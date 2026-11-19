@@ -7,7 +7,7 @@
 <meta name="description" content="PULSE: a hardware-synchronized five-modality dataset (motion capture, surface EMG, eye tracking, IMU, finger-level pressure) of long-horizon daily activities. NeurIPS 2026 Evaluations &amp; Datasets Track.">
 <meta name="color-scheme" content="light dark">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23121b19'/%3E%3Cpath d='M4 17h6l3-8 5 15 3-7h7' fill='none' stroke='%23ffffff' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
-<link rel="stylesheet" href="assets/style.css?v=20261119e">
+<link rel="stylesheet" href="assets/style.css?v=20261119f">
 <script>
   // Apply a stored theme choice before first paint (per-viewer convenience only).
   (function () {
@@ -301,7 +301,7 @@
       <figure><img src="assets/img/scene_s6.jpg" width="600" height="600" alt="Business-travel luggage packing: overhead photo of the props in their initial state" loading="lazy"><figcaption><span class="sc-id">S6</span>Business-travel luggage packing</figcaption></figure>
       <figure><img src="assets/img/scene_s8.jpg" width="600" height="600" alt="Clothes hanging and folding: overhead photo of the props in their initial state" loading="lazy"><figcaption><span class="sc-id">S8</span>Clothes hanging and folding</figcaption></figure>
     </div>
-    <p class="fineprint">Initial prop layout, photographed from above — scroll the strip sideways to see the rest. Six of the eight scenarios have such a photo; S5 and S7 were recorded without one.</p>
+    <p class="fineprint">Initial prop layout, photographed from above — the strip scrolls on its own and you can drag it sideways. Six of the eight scenarios have such a photo; S5 and S7 were recorded without one. <button type="button" class="strip-toggle" id="stripToggle">Pause</button></p>
 
     <details class="scene-notes">
       <summary>Instruction and props for each scenario</summary>
@@ -428,8 +428,18 @@
       <p>Grasp onset is defined as the moment total hand pressure crosses 5 g from below. Of 3,723 grasp events detected across 80 recordings, 413 clean events that start from a quiescent pre-grasp period are retained. Aligned to contact and averaged over these events, the EMG envelope and hand velocity rise well before the pressure jump (first figure). Per-event onset estimates average −568 ± 370 ms for EMG (median −530 ms) and −586 ± 355 ms for hand motion (median −580 ms) relative to contact (second figure).</p>
       <div class="case-figs">
         <figure class="figure figure-mid">
-          <a class="plate zoom" href="assets/img/grasp_phase_timing.png" target="_blank" rel="noopener" title="Open the full-size image"><img src="assets/img/grasp_phase_timing.png" width="1400" height="770" alt="Line chart from minus 2000 to plus 500 ms around pressure contact onset, averaged over 413 grasp events. The EMG envelope and hand velocity climb from a low baseline starting at roughly minus 1300 ms; hand velocity peaks near minus 600 ms and the EMG envelope stays high until contact. Dotted lines mark the mean onset estimates, minus 568 ms for EMG and minus 586 ms for motion. The pressure trace falls to zero just before 0 ms and jumps at contact." loading="lazy"></a>
-          <figcaption>EMG envelope, hand velocity and pressure averaged across 413 clean grasp events and aligned to pressure contact onset (t = 0); shaded bands are ±0.5σ. Dotted lines mark the mean per-event onset estimates. <a class="full" href="assets/img/grasp_phase_timing.png" target="_blank" rel="noopener">Full size</a></figcaption>
+          <div class="f0-card">
+            <div class="f0-legend" id="f0Legend" role="group" aria-label="Series visibility">
+              <button type="button" data-k="emg" aria-pressed="true"><i style="background:#E74C3C"></i>EMG envelope</button>
+              <button type="button" data-k="velocity" aria-pressed="true"><i style="background:#3498DB"></i>Hand velocity</button>
+              <button type="button" data-k="pressure" aria-pressed="true"><i style="background:#27AE60"></i>Pressure (contact)</button>
+              <span class="f0-hint">hover for values · click a key to hide a series</span>
+            </div>
+            <canvas id="f0Chart" class="f0-canvas" tabindex="0" role="img"
+              aria-label="Anticipatory coordination around pressure contact, averaged over 413 clean grasp events from 2,000 ms before contact to 500 ms after. The EMG envelope and hand velocity climb from a low baseline starting around minus 1,300 ms; hand velocity peaks near minus 600 ms and pressure jumps at contact. Dotted lines mark the mean per-event onsets, minus 568 ms for EMG and minus 586 ms for motion. Move the pointer over the chart, or focus it and use the arrow keys, to read the mean and the plus or minus half-sigma band at any time."></canvas>
+            <div class="f0-tip" id="f0Tip" hidden></div>
+          </div>
+          <figcaption>EMG envelope, hand velocity and pressure averaged across 413 clean grasp events and aligned to pressure contact onset (t = 0); shaded bands are ±0.5σ. Dotted lines mark the mean per-event onset estimates. Hover or use the arrow keys to read any time point. <a class="full" href="assets/img/grasp_phase_timing.png" target="_blank" rel="noopener">Static image</a></figcaption>
         </figure>
         <figure class="figure">
           <a class="plate zoom" href="assets/img/delay_distributions.png" target="_blank" rel="noopener" title="Open the full-size image"><img src="assets/img/delay_distributions.png" width="1400" height="498" alt="Two histograms of per-event onset delays relative to contact: EMG onset with mean minus 568 ms and median minus 530 ms; hand motion onset with mean minus 586 ms and median minus 580 ms." loading="lazy"></a>
@@ -647,7 +657,9 @@ hf download velvet-pine-22/PULSE --repo-type dataset \
 </footer>
 
 <div class="tooltip" id="tooltip" role="tooltip" hidden></div>
-<script src="assets/sample_preview.js?v=20261119e"></script>
-<script src="assets/app.js?v=20261119e"></script>
+<script src="assets/sample_preview.js?v=20261119f"></script>
+<script src="assets/f0_data.js?v=20261119f"></script>
+<script src="assets/f0.js?v=20261119f"></script>
+<script src="assets/app.js?v=20261119f"></script>
 </body>
 </html>

@@ -1070,7 +1070,7 @@
     if (window.PULSE_SAMPLE) { initViewer(); return; }
     loadState = 'loading';
     var s = document.createElement('script');
-    s.src = 'assets/sample.js?v=20261119e';
+    s.src = 'assets/sample.js?v=20261119f';
     s.async = true;
     s.onload = function () { loadState = 'done'; initViewer(); };
     s.onerror = function () { loadState = 'failed'; viewerFailed(); };
@@ -1128,4 +1128,77 @@
     window.addEventListener('resize', onResize);
   }
   drawAllStatic();
+})();
+
+/* ------------------------------------------------------------ scene photo strip: slow auto-scroll loop */
+(function () {
+  var strip = document.querySelector('.scene-strip');
+  if (!strip) return;
+  var toggle = document.getElementById('stripToggle');
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)');
+  var figs = Array.prototype.slice.call(strip.children);
+
+  // one duplicate pass makes the wrap seamless; the copy is hidden from assistive tech
+  figs.forEach(function (f) {
+    var c = f.cloneNode(true);
+    c.setAttribute('aria-hidden', 'true');
+    Array.prototype.forEach.call(c.querySelectorAll('img'), function (im) {
+      im.setAttribute('alt', ''); im.removeAttribute('loading');
+    });
+    strip.appendChild(c);
+  });
+
+  var half = 0, raf = 0, last = 0, pos = 0;
+  var manualPause = false, hovering = false, focused = false, onScreen = true;
+  var SPEED = 0.42;                                   // px per 60 Hz frame, ~25 px/s
+
+  // Chrome drops the fractional part of this element's scrollLeft, so the offset is kept here
+  // and written back as whole pixels; the trace otherwise sits at 0 for ever.
+  function measure() { half = strip.scrollWidth / 2; }
+  measure();
+  window.addEventListener('resize', measure);
+
+  function running() {
+    return !manualPause && !hovering && !focused && onScreen && !(reduce && reduce.matches);
+  }
+  function syncToggle() {
+    if (!toggle) return;
+    var on = !manualPause;
+    toggle.textContent = on ? 'Pause' : 'Play';
+    toggle.setAttribute('aria-pressed', on ? 'false' : 'true');
+    toggle.setAttribute('aria-label', on ? 'Pause the automatic photo scroll' : 'Resume the automatic photo scroll');
+  }
+
+  function step(ts) {
+    raf = requestAnimationFrame(step);
+    if (!last) last = ts;
+    var dt = Math.min(64, ts - last);
+    last = ts;
+    if (!running() || half <= 0) { pos = strip.scrollLeft; return; }
+    // a jump the loop did not make means the reader dragged the strip; follow them
+    if (Math.abs(strip.scrollLeft - Math.round(pos)) > 2) pos = strip.scrollLeft;
+    pos += SPEED * dt / 16.7;
+    while (pos >= half) pos -= half;
+    while (pos < 0) pos += half;
+    strip.scrollLeft = Math.round(pos);
+  }
+
+  strip.addEventListener('pointerenter', function () { hovering = true; });
+  strip.addEventListener('pointerleave', function () { hovering = false; });
+  strip.addEventListener('focusin', function () { focused = true; });
+  strip.addEventListener('focusout', function () { focused = false; });
+  strip.addEventListener('pointerdown', function () { hovering = true; });
+  window.addEventListener('pointerup', function () {
+    hovering = strip.matches(':hover');
+  });
+  if ('IntersectionObserver' in window) {
+    new IntersectionObserver(function (es) { onScreen = es[0].isIntersecting; }, { threshold: 0.15 })
+      .observe(strip);
+  }
+  if (toggle) {
+    toggle.addEventListener('click', function () { manualPause = !manualPause; syncToggle(); });
+    syncToggle();
+  }
+  if (reduce && reduce.addEventListener) reduce.addEventListener('change', syncToggle);
+  raf = requestAnimationFrame(step);
 })();
