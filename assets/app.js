@@ -879,17 +879,20 @@
         ctx.fillRect(x0, strip.seg.y + strip.seg.h, x1 - x0, strip.axisY - 4 - strip.seg.y - strip.seg.h);
         roundRect(ctx, x0 + 1, strip.seg.y + 2, Math.max(2, x1 - x0 - 2), strip.seg.h - 4, 4);
         ctx.fillStyle = pal.accent; ctx.fill();
-        ctx.font = '600 10.5px ' + MONO; ctx.textBaseline = 'middle';
-        var tw = ctx.measureText(sg.primitive).width;
+        // the highlight is the same rect as the outline above; only the label picks a size that fits
         var cxm = (x0 + x1) / 2, cy = strip.seg.y + strip.seg.h / 2;
-        if (tw + 4 >= x1 - x0) {
-          // narrow screens: the label does not fit its box, so draw it as a pill over the box (active segment only)
-          var pwid = tw + 12, pl = Math.max(strip.L, Math.min(strip.L + strip.plotW - pwid, cxm - pwid / 2));
+        var lbl = fitSegLabel(ctx, sg.primitive, x1 - x0 - 6);
+        if (!lbl) {
+          // box too narrow for any text (phone widths): float the name as a pill over the block
+          ctx.font = '600 10.5px ' + MONO;
+          var pwid = ctx.measureText(sg.primitive).width + 12;
+          var pl = Math.max(strip.L, Math.min(strip.L + strip.plotW - pwid, cxm - pwid / 2));
           roundRect(ctx, pl, strip.seg.y + 3, pwid, strip.seg.h - 6, 9);
           ctx.fillStyle = pal.accent; ctx.fill();
-          cxm = pl + pwid / 2;
+          cxm = pl + pwid / 2; lbl = sg.primitive;
         }
-        ctx.fillStyle = pal.accentInk; ctx.textAlign = 'center'; ctx.fillText(sg.primitive, cxm, cy); ctx.textAlign = 'left';
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = pal.accentInk; ctx.textAlign = 'center'; ctx.fillText(lbl, cxm, cy); ctx.textAlign = 'left';
       }
       var cx = Math.round(tx(state.t)) + 0.5;
       ctx.strokeStyle = pal.ink; ctx.lineWidth = 1.5;
@@ -1059,7 +1062,7 @@
     if (window.PULSE_SAMPLE) { initViewer(); return; }
     loadState = 'loading';
     var s = document.createElement('script');
-    s.src = 'assets/sample.js?v=20261119b';
+    s.src = 'assets/sample.js?v=20261119c';
     s.async = true;
     s.onload = function () { loadState = 'done'; initViewer(); };
     s.onerror = function () { loadState = 'failed'; viewerFailed(); };
