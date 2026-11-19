@@ -772,23 +772,15 @@
       strip.narrow = narrow;
     }
     function tx(t) { return strip.L + (t / T) * strip.plotW; }
-    // Segment blocks are only a couple of seconds wide, so spell the primitive out in the
-    // largest size that fits instead of dropping the label whenever 10.5px overflows.
+    // Spell the primitive out in the largest size that fits the block; if even 9px overflows,
+    // return '' rather than a stub, so a block is either named in full or left blank.
     function fitSegLabel(ctx, txt, avail) {
       var sizes = [10.5, 10, 9.5, 9], i;
       for (i = 0; i < sizes.length; i++) {
         ctx.font = '500 ' + sizes[i] + 'px ' + MONO;
         if (ctx.measureText(txt).width <= avail) return txt;
       }
-      if (avail < 16) return '';
-      var w = ctx.measureText(txt).width, keep = txt.length;
-      var cut = txt;
-      while (keep > 1 && w > avail) {
-        keep--;
-        cut = txt.slice(0, keep) + '…';
-        w = ctx.measureText(cut).width;
-      }
-      return keep >= 4 ? cut : '';   // two-letter stubs read as noise; leave the block blank instead
+      return '';   // a stub reads as noise: leave the block blank and let the active label carry the name
     }
     function renderStripLayer() {
       if (!V.strip) return;
@@ -825,14 +817,28 @@
         }
       }
       label(strip.seg.y + 2, strip.seg.h, 'Actions', 'VLM-assisted', null);
-      segs.forEach(function (sg) {
-        var x0 = tx(sg.start), x1 = tx(sg.end);
-        roundRect(ctx, x0 + 1, strip.seg.y + 2, Math.max(2, x1 - x0 - 2), strip.seg.h - 4, 4);
+      // Each block is a chip sized to its own label: at least the segment's span, wider when the
+      // primitive needs the room, but never past the neighbouring segments.
+      strip.segRects = [];
+      var prevRight = L, gapPx = 4;
+      segs.forEach(function (sg, i) {
+        var x0 = tx(sg.start), x1 = tx(sg.end), cxm0 = (x0 + x1) / 2;
+        var limit = (i < segs.length - 1 ? tx(segs[i + 1].start) : L + pw) - gapPx;
+        ctx.font = '500 10.5px ' + MONO;
+        var need = ctx.measureText(sg.primitive).width + 16;
+        var lo = Math.max(prevRight + gapPx, L);
+        var bw = Math.max(x1 - x0 - 2, need);
+        if (bw > limit - lo) bw = Math.max(6, limit - lo);
+        var bx = Math.min(Math.max(cxm0 - bw / 2, lo), Math.max(lo, limit - bw));
+        bx = Math.min(bx, L + pw - bw);
+        prevRight = bx + bw;
+        strip.segRects.push({ x: bx, w: bw });
+        roundRect(ctx, bx, strip.seg.y + 2, bw, strip.seg.h - 4, 4);
         ctx.fillStyle = pal.surface; ctx.fill();
         ctx.strokeStyle = pal.muted; ctx.lineWidth = 1; ctx.stroke();
         ctx.textBaseline = 'middle';
-        var lbl = fitSegLabel(ctx, sg.primitive, x1 - x0 - 6);
-        if (lbl) { ctx.fillStyle = pal.ink2; ctx.textAlign = 'center'; ctx.fillText(lbl, (x0 + x1) / 2, strip.seg.y + strip.seg.h / 2); ctx.textAlign = 'left'; }
+        var lbl = strip.narrow ? '' : fitSegLabel(ctx, sg.primitive, bw - 10);
+        if (lbl) { ctx.fillStyle = pal.ink2; ctx.textAlign = 'center'; ctx.fillText(lbl, bx + bw / 2, strip.seg.y + strip.seg.h / 2); ctx.textAlign = 'left'; }
       });
       strip.bands.forEach(function (b) {
         ctx.strokeStyle = pal.rule2; ctx.lineWidth = 1;
@@ -877,11 +883,13 @@
         var sg = segs[si], x0 = tx(sg.start), x1 = tx(sg.end);
         ctx.fillStyle = alpha(pal.accent, 0.08);
         ctx.fillRect(x0, strip.seg.y + strip.seg.h, x1 - x0, strip.axisY - 4 - strip.seg.y - strip.seg.h);
-        roundRect(ctx, x0 + 1, strip.seg.y + 2, Math.max(2, x1 - x0 - 2), strip.seg.h - 4, 4);
+        // the highlight is the very rect the static layer drew for this segment
+        var rc = strip.segRects && strip.segRects[si];
+        var bx = rc ? rc.x : x0 + 1, bw = rc ? rc.w : Math.max(2, x1 - x0 - 2);
+        roundRect(ctx, bx, strip.seg.y + 2, bw, strip.seg.h - 4, 4);
         ctx.fillStyle = pal.accent; ctx.fill();
-        // the highlight is the same rect as the outline above; only the label picks a size that fits
-        var cxm = (x0 + x1) / 2, cy = strip.seg.y + strip.seg.h / 2;
-        var lbl = fitSegLabel(ctx, sg.primitive, x1 - x0 - 6);
+        var cxm = bx + bw / 2, cy = strip.seg.y + strip.seg.h / 2;
+        var lbl = strip.narrow ? '' : fitSegLabel(ctx, sg.primitive, bw - 10);
         if (!lbl) {
           // box too narrow for any text (phone widths): float the name as a pill over the block
           ctx.font = '600 10.5px ' + MONO;
@@ -1062,7 +1070,7 @@
     if (window.PULSE_SAMPLE) { initViewer(); return; }
     loadState = 'loading';
     var s = document.createElement('script');
-    s.src = 'assets/sample.js?v=20261119d';
+    s.src = 'assets/sample.js?v=20261119e';
     s.async = true;
     s.onload = function () { loadState = 'done'; initViewer(); };
     s.onerror = function () { loadState = 'failed'; viewerFailed(); };
