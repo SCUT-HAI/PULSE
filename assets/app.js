@@ -772,6 +772,24 @@
       strip.narrow = narrow;
     }
     function tx(t) { return strip.L + (t / T) * strip.plotW; }
+    // Segment blocks are only a couple of seconds wide, so spell the primitive out in the
+    // largest size that fits instead of dropping the label whenever 10.5px overflows.
+    function fitSegLabel(ctx, txt, avail) {
+      var sizes = [10.5, 10, 9.5, 9], i;
+      for (i = 0; i < sizes.length; i++) {
+        ctx.font = '500 ' + sizes[i] + 'px ' + MONO;
+        if (ctx.measureText(txt).width <= avail) return txt;
+      }
+      if (avail < 16) return '';
+      var w = ctx.measureText(txt).width, keep = txt.length;
+      var cut = txt;
+      while (keep > 1 && w > avail) {
+        keep--;
+        cut = txt.slice(0, keep) + '…';
+        w = ctx.measureText(cut).width;
+      }
+      return keep >= 4 ? cut : '';   // two-letter stubs read as noise; leave the block blank instead
+    }
     function renderStripLayer() {
       if (!V.strip) return;
       var f = fit(V.strip), w = f.w, h = f.h, pal = P();
@@ -812,9 +830,9 @@
         roundRect(ctx, x0 + 1, strip.seg.y + 2, Math.max(2, x1 - x0 - 2), strip.seg.h - 4, 4);
         ctx.fillStyle = pal.surface; ctx.fill();
         ctx.strokeStyle = pal.muted; ctx.lineWidth = 1; ctx.stroke();
-        ctx.font = '500 10.5px ' + MONO; ctx.textBaseline = 'middle';
-        var tw = ctx.measureText(sg.primitive).width;
-        if (tw + 4 < x1 - x0) { ctx.fillStyle = pal.ink2; ctx.textAlign = 'center'; ctx.fillText(sg.primitive, (x0 + x1) / 2, strip.seg.y + strip.seg.h / 2); ctx.textAlign = 'left'; }
+        ctx.textBaseline = 'middle';
+        var lbl = fitSegLabel(ctx, sg.primitive, x1 - x0 - 6);
+        if (lbl) { ctx.fillStyle = pal.ink2; ctx.textAlign = 'center'; ctx.fillText(lbl, (x0 + x1) / 2, strip.seg.y + strip.seg.h / 2); ctx.textAlign = 'left'; }
       });
       strip.bands.forEach(function (b) {
         ctx.strokeStyle = pal.rule2; ctx.lineWidth = 1;
@@ -1041,7 +1059,7 @@
     if (window.PULSE_SAMPLE) { initViewer(); return; }
     loadState = 'loading';
     var s = document.createElement('script');
-    s.src = 'assets/sample.js?v=20261119';
+    s.src = 'assets/sample.js?v=20261119b';
     s.async = true;
     s.onload = function () { loadState = 'done'; initViewer(); };
     s.onerror = function () { loadState = 'failed'; viewerFailed(); };
