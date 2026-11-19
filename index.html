@@ -1,0 +1,760 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PULSE Dataset</title>
+<meta name="description" content="PULSE: a hardware-synchronized five-modality dataset (motion capture, surface EMG, eye tracking, IMU, finger-level pressure) of long-horizon daily activities. NeurIPS 2026 Evaluations &amp; Datasets Track.">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23121b19'/%3E%3Cpath d='M4 17h6l3-8 5 15 3-7h7' fill='none' stroke='%23ffffff' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="assets/style.css">
+<script>
+  // Apply a stored theme choice before first paint (per-viewer convenience only).
+  (function () {
+    try {
+      var t = localStorage.getItem('pulse-theme');
+      if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t);
+    } catch (e) {}
+  })();
+</script>
+</head>
+<body>
+<a class="skip" href="#overview">Skip to content</a>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="#top" aria-label="PULSE, back to top">PULSE</a>
+    <nav class="nav" aria-label="Sections">
+      <a href="#overview">Overview</a>
+      <a href="#modalities">Modalities</a>
+      <a href="#viewer">Viewer</a>
+      <a href="#scenes">Scenes</a>
+      <a href="#annotations">Annotations</a>
+      <a href="#benchmarks">Benchmarks</a>
+      <a href="#comparison">Comparison</a>
+      <a href="#data">Data</a>
+      <a href="#ethics">Ethics</a>
+      <a href="#citation">Citation</a>
+    </nav>
+    <button class="theme-btn" id="themeBtn" type="button" aria-label="Color theme: follows system">
+      <span class="theme-ico" aria-hidden="true"></span><span class="theme-txt">Auto</span>
+    </button>
+  </div>
+</header>
+
+<main id="top">
+
+<!-- ============================== HERO ============================== -->
+<section class="hero" aria-labelledby="heroTitle">
+  <div class="wrap">
+    <div class="hero-grid">
+      <div class="hero-text">
+        <p class="venue"><span class="venue-mark">NeurIPS 2026</span><span class="venue-track">Evaluations &amp; Datasets Track</span><span class="venue-track">Spotlight</span></p>
+        <h1 id="heroTitle" class="wordmark">PULSE</h1>
+        <p class="fulltitle">A Synchronized Five-Modality Dataset for Sensorimotor Coordination in Long-Horizon Daily Activities</p>
+        <p class="acronym" aria-label="Physiological Unified Long-duration Synchronized Embodiment"><span><b>P</b>hysiological</span> <span><b>U</b>nified</span> <span><b>L</b>ong-duration</span> <span><b>S</b>ynchronized</span> <span><b>E</b>mbodiment</span></p>
+        <p class="authors">Wolin Liang, Yang Gao, Peiyu Yan, YueXiang Hu, Yingjing Xiao, Xiongfeng Ying, YingNian Guo, Cheng Zhang, Zhanpeng Jin</p>
+        <div class="actions">
+          <a class="btn btn-primary" href="https://huggingface.co/datasets/velvet-pine-22/PULSE" target="_blank" rel="noopener">Dataset <span class="host">Hugging Face</span></a>
+          <a class="btn" href="https://huggingface.co/velvet-pine-22/PULSE-code" target="_blank" rel="noopener">Code</a>
+          <a class="btn" href="#citation">BibTeX</a>
+          <span class="btn btn-soon" aria-disabled="true" title="The paper PDF link will be added for the camera-ready version">Paper <span class="soon">coming soon</span></span>
+        </div>
+      </div>
+      <figure class="hero-fig">
+        <a class="plate zoom" href="assets/img/sensor_suite.jpg" target="_blank" rel="noopener" title="Open the full-size image"><img src="assets/img/sensor_suite.jpg" width="1400" height="1042" alt="A volunteer wearing the PULSE sensor suite, with labels for eye and gaze tracking, ego video, motion-capture markers, the EMG armband, IMUs and finger-level pressure gloves; close-ups of the IMU glove and the pressure glove on the left. The face is blurred."></a>
+        <figcaption>The sensor suite: optical motion-capture markers across the body and fingers, a Myo Armband for surface EMG, Dikablis Glasses 3 for binocular eye tracking, 10 wearable IMUs and finger-level pressure arrays on both hands (glove close-ups on the left). Face blurred. <a class="full" href="assets/img/sensor_suite.jpg" target="_blank" rel="noopener">Full size</a></figcaption>
+      </figure>
+    </div>
+    <figure class="hero-traces">
+      <div class="hero-canvas-wrap"><canvas id="heroTraces" role="img" aria-label="Five sensor streams from sample recording v1s1 plotted on one shared time axis, with annotated action segments marked underneath."></canvas></div>
+      <figcaption>Sample recording v1s1 (S1, office desk organization), first 18 s. One trace per modality on the shared clock; bars underneath mark the annotated action segments.</figcaption>
+    </figure>
+    <dl class="keystrip">
+      <!-- source: sections/dataset.tex: 'We recruited 40 healthy adult volunteers from a university campus.' / '282 recordings from 36 volunteers have dense action-segment annotations' -->
+      <div class="kpi"><dt>volunteers</dt><dd class="kpi-val">40</dd><dd class="kpi-sub">healthy adults; 36 with dense annotations</dd></div>
+      <!-- source: sections/dataset.tex: 'The dataset covers 8 daily-activity scenarios' / '33 volunteers completed a dedicated motion-primitive protocol (S9)' -->
+      <div class="kpi"><dt>daily-activity scenarios</dt><dd class="kpi-val">8</dd><dd class="kpi-sub">plus a motion-primitive protocol (S9)</dd></div>
+      <!-- source: sections/dataset.tex: 'The public release contains 304 task recordings from the 8 daily-activity scenarios (S1–S8) ... plus 33 isolated motion-primitive recordings' -->
+      <div class="kpi"><dt>task recordings</dt><dd class="kpi-val">304</dd><dd class="kpi-sub">plus 33 motion-primitive recordings</dd></div>
+      <!-- source: sections/related_work.tex (Table tab:dataset_comparison): 'PULSE duration includes ~6.8 h of daily-activity scenarios plus ~2.8 h of motion-primitive recordings.' -->
+      <div class="kpi"><dt>hours recorded</dt><dd class="kpi-val">9.6 h</dd><dd class="kpi-sub">≈6.8 h of tasks + ≈2.8 h of primitives</dd></div>
+      <!-- source: camera-ready v12 dataset.tex: 'The 282 of the 304 task recordings (from 36 volunteers) carry dense action-segment annotations totalling 7,356 action segments.' (abstract: 'over 7,300'). -->
+      <div class="kpi"><dt>action segments</dt><dd class="kpi-val">7,356</dd><dd class="kpi-sub">in 282 annotated recordings, each human-checked and corrected</dd></div>
+      <!-- source: sections/dataset.tex: 'All five sensor streams are synchronized to a unified 100 Hz time base.' -->
+      <div class="kpi"><dt>shared time base</dt><dd class="kpi-val">100 Hz</dd><dd class="kpi-sub">every stream resampled onto one grid</dd></div>
+    </dl>
+  </div>
+</section>
+
+<!-- ============================== OVERVIEW ============================== -->
+<section id="overview" class="section">
+  <div class="wrap">
+    <header class="sec-head">
+      <p class="eyebrow">Overview</p>
+      <h2>Sensorimotor coordination in long daily tasks</h2>
+    </header>
+    <div class="overview-grid">
+      <div class="abstract">
+        <h3>Abstract</h3>
+        <p>Existing human-activity datasets typically cover only one or two sensor channels and often focus on short, isolated actions, leaving long-duration compositional tasks largely unsupported as benchmarks for temporal cross-modal sensorimotor learning. We introduce PULSE (Physiological Unified Long-duration Synchronized Embodiment), a synchronized five-modality dataset that enables benchmarking temporal cross-modal sensorimotor learning: how models recognize ongoing activities, anticipate future contact, reconstruct unobserved signals, and remain robust when physiological, motion, gaze, inertial, and tactile channels are partially observed. Collected from 40 volunteers across 8 ecologically valid daily-activity scenarios together with a dedicated motion-primitive collection, PULSE records full-body optical motion capture with finger-level hand articulation, surface EMG, binocular eye tracking, wearable IMU, and a finger-level pressure array recording quantitative grip force, all sampled at 100 Hz. Each scenario is a long-horizon compositional task containing many smaller sub-tasks, yielding over 7,300 annotated action segments. Each segment is tagged with a motor primitive, the hand involved, the manipulated object, and a natural-language description with four paraphrased variants.</p>
+        <p>On top of the dataset, we define multiple benchmark tasks for temporal cross-modal sensorimotor learning: scene and fine-grained action recognition, grasp onset anticipation, missing-modality robustness, tactile-driven sub-second grasp-state prediction, cross-modal pressure reconstruction, etc. Together these tasks evaluate how information transfers across physiology, motion, gaze, and touch, rather than reducing the dataset to an activity-label catalog. We evaluate three backbone architectures, nine fusion strategies, seven published baselines, and task-specific models including SyncFuse and DailyActFormer. Detailed task definitions and results are in the Appendices. Data, annotations, and baseline code will be publicly released.</p>
+        <p class="fineprint">The dataset, its annotations and the baseline code are already available on Hugging Face; see <a href="#data">Data format and download</a>.</p>
+      </div>
+      <aside class="loop" aria-labelledby="loopTitle">
+        <h3 id="loopTitle">Why the streams must share one clock</h3>
+        <ol class="loop-list">
+          <li><strong>Gaze leads the hand.</strong> In activities of daily living the eyes fixate the next object of interest well before the hand arrives <span class="cite">(Land et al., 1999; Hayhoe &amp; Ballard, 2005)</span>.</li>
+          <li><strong>Muscles fire before force.</strong> Grip force is scaled in a feed-forward manner, with EMG activation preceding the grasping force by hundreds of milliseconds <span class="cite">(Johansson &amp; Westling, 1984)</span>. This coupling is only observable when EMG is recorded synchronously with kinematics and contact.</li>
+          <li><strong>Touch is needed for dexterity.</strong> Removing cutaneous force feedback degrades precision-grip force control even when vision and proprioception remain intact <span class="cite">(Monzée et al., 2003)</span>.</li>
+        </ol>
+        <p class="loop-gap">Existing activity datasets instrument only a slice of this loop: skeleton datasets discard physiological signals, hand–object datasets omit gaze and EMG, and contact data, when present, is limited to thermal maps or binary tactile gloves. PULSE is positioned as a high-density, hardware-synchronized benchmark rather than a large-scale activity corpus.</p>
+      </aside>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== MODALITIES ============================== -->
+<section id="modalities" class="section">
+  <div class="wrap">
+    <header class="sec-head">
+      <h2>Five modalities on one 100 Hz time base</h2>
+      <p class="sec-intro">All five sensor streams are synchronized to a unified 100 Hz time base. A shared trigger from the Qualisys motion-capture controller starts the other acquisition systems at the beginning of each trial, and residual clock drift is corrected in post-processing by cross-correlating the inertial and motion-capture signals. Each device records at its own native rate; the release resamples every stream onto the shared 100 Hz grid, so for slower devices the grid values are interpolated. The traces on each card come from the sample recording shown in the viewer below.</p>
+    </header>
+    <div class="mod-list">
+      <article class="mod" id="mod-mocap">
+        <div class="mod-name">
+          <h3><span class="key key-mocap" aria-hidden="true"></span>Motion capture</h3>
+          <p class="mod-meta">56 joints · on the 100 Hz grid</p>
+          <p class="mod-what">Whole-body kinematics with finger-level hand articulation.</p>
+        </div>
+        <figure class="mod-prev">
+          <canvas class="mod-canvas" data-preview="mocap" role="img" aria-label="Hand speed, right (solid) and left (dashed), sample recording v1s1, 0 to 18 s"></canvas>
+          <figcaption>Hand speed, right (solid) and left (dashed) · v1s1, 0–18 s</figcaption>
+        </figure>
+        <dl class="mod-specs">
+          <div><dt>Device</dt><dd>Qualisys optical marker system (Animation and Full Fingers marker sets)</dd></div>
+          <div><dt>Signal</dt><dd>3-D marker positions and per-joint quaternions, 422-d raw; 620-d after adding hip-relative coordinates and velocities</dd></div>
+          <div><dt>Placement</dt><dd>Reflective markers across the body and on all ten fingers. The released 52 markers and 56-joint skeleton cover head, trunk, arms and hands; legs are not included</dd></div>
+          <div><dt>Coverage</dt><dd><span class="cov"><span class="cov-bar"><span class="cov-fill key-mocap" style="width:81%"></span></span><span class="cov-txt">≈81% of task recordings</span></span></dd></div>
+        </dl>
+      </article>
+      <article class="mod" id="mod-emg">
+        <div class="mod-name">
+          <h3><span class="key key-emg" aria-hidden="true"></span>Surface EMG</h3>
+          <p class="mod-meta">8 channels · on the 100 Hz grid</p>
+          <p class="mod-what">Forearm muscle activation, which precedes grip force.</p>
+        </div>
+        <figure class="mod-prev">
+          <canvas class="mod-canvas" data-preview="emg" role="img" aria-label="Envelope of the 8 channels, each scaled to its own maximum, sample recording v1s1, 0 to 18 s"></canvas>
+          <figcaption>Envelope of the 8 channels, each scaled to its own maximum · v1s1, 0–18 s</figcaption>
+        </figure>
+        <dl class="mod-specs">
+          <div><dt>Device</dt><dd>Myo Armband (Thalmic Labs)</dd></div>
+          <div><dt>Signal</dt><dd>8 channels of dry surface EMG; band-pass filtered before use</dd></div>
+          <div><dt>Placement</dt><dd>Dominant forearm, channel 1 over the extensor digitorum</dd></div>
+          <div><dt>Coverage</dt><dd><span class="cov"><span class="cov-bar"><span class="cov-fill key-emg" style="width:99%"></span></span><span class="cov-txt">≈99% of task recordings</span></span></dd></div>
+        </dl>
+      </article>
+      <article class="mod" id="mod-gaze">
+        <div class="mod-name">
+          <h3><span class="key key-gaze" aria-hidden="true"></span>Eye tracking</h3>
+          <p class="mod-meta">24-d · on the 100 Hz grid</p>
+          <p class="mod-what">Binocular gaze, which tends to lead the hand to the next object.</p>
+        </div>
+        <figure class="mod-prev">
+          <canvas class="mod-canvas" data-preview="gaze" role="img" aria-label="Gaze point in the scene image, x (solid) and y (dashed), sample recording v1s1, 0 to 18 s"></canvas>
+          <figcaption>Gaze point in the scene image, x (solid) and y (dashed) · v1s1, 0–18 s</figcaption>
+        </figure>
+        <dl class="mod-specs">
+          <div><dt>Device</dt><dd>Dikablis Glasses 3 (Ergoneers)</dd></div>
+          <div><dt>Signal</dt><dd>Pupil position and size, fixation and saccade events, and the gaze point in the scene-camera image</dd></div>
+          <div><dt>Placement</dt><dd>Head-worn glasses, binocular</dd></div>
+          <div><dt>Coverage</dt><dd><span class="cov"><span class="cov-bar"><span class="cov-fill key-gaze" style="width:93%"></span></span><span class="cov-txt">≈93% of task recordings</span></span></dd></div>
+        </dl>
+      </article>
+      <article class="mod" id="mod-imu">
+        <div class="mod-name">
+          <h3><span class="key key-imu" aria-hidden="true"></span>Inertial sensors</h3>
+          <p class="mod-meta">10 units · on the 100 Hz grid</p>
+          <p class="mod-what">Inertial motion of the wrists and fingers.</p>
+        </div>
+        <figure class="mod-prev">
+          <canvas class="mod-canvas" data-preview="imu" role="img" aria-label="Wrist angular speed, right (solid) and left (dashed), sample recording v1s1, 0 to 18 s"></canvas>
+          <figcaption>Wrist angular speed, right (solid) and left (dashed) · v1s1, 0–18 s</figcaption>
+        </figure>
+        <dl class="mod-specs">
+          <div><dt>Device</dt><dd>WitMotion WT9011DCL</dd></div>
+          <div><dt>Signal</dt><dd>Acceleration, angular velocity, Euler angle, magnetic field and orientation quaternion: 16 channels per unit, 160-d in total</dd></div>
+          <div><dt>Placement</dt><dd>Each hand: wrist, thumb, index, middle and ring finger</dd></div>
+          <div><dt>Coverage</dt><dd><span class="cov"><span class="cov-bar"><span class="cov-fill key-imu" style="width:98%"></span></span><span class="cov-txt">≈98% of task recordings</span></span></dd></div>
+        </dl>
+      </article>
+      <article class="mod" id="mod-press">
+        <div class="mod-name">
+          <h3><span class="key key-press" aria-hidden="true"></span>Finger-level pressure</h3>
+          <p class="mod-meta">50 cells · on the 100 Hz grid</p>
+          <p class="mod-what">Contact force during manipulation, in grams rather than binary contact.</p>
+        </div>
+        <figure class="mod-prev">
+          <canvas class="mod-canvas" data-preview="press" role="img" aria-label="Summed force per hand, right (solid) and left (dashed), sample recording v1s1, 0 to 18 s"></canvas>
+          <figcaption>Summed force per hand, right (solid) and left (dashed) · v1s1, 0–18 s</figcaption>
+        </figure>
+        <dl class="mod-specs">
+          <div><dt>Device</dt><dd>GT-G0505M pressure array (Guantuo Electronics)</dd></div>
+          <div><dt>Signal</dt><dd>25 sensing points per hand, grip force in grams</dd></div>
+          <div><dt>Placement</dt><dd>Finger-level arrays on both hands</dd></div>
+          <div><dt>Coverage</dt><dd><span class="cov"><span class="cov-bar"><span class="cov-fill key-press" style="width:70%"></span></span><span class="cov-txt">≈70% of task recordings</span></span></dd></div>
+        </dl>
+      </article>
+    </div>
+    <p class="fineprint">Coverage is the share of the 304 task recordings in which the stream is present; 198 recordings carry all five. Synchronized first-person scene-camera video exists as auxiliary material and is excluded from the benchmark protocol.</p>
+  </div>
+</section>
+
+<!-- ============================== VIEWER ============================== -->
+<section id="viewer" class="section section-viewer">
+  <div class="wrap">
+    <header class="sec-head">
+      <p class="eyebrow">Sample recording <span class="nocaps">v1s1</span></p>
+      <h2>Synchronized viewer</h2>
+      <p class="sec-intro">Eighteen seconds from the public sample: volunteer v1 in scenario S1, office desk organization. Every stream is cut from the released 100 Hz aligned files and drawn on the same time axis. Play or scrub to follow gaze, muscle activity, hand motion and contact around each labeled action.</p>
+    </header>
+
+    <div class="viewer is-loading" id="vRoot" role="group" tabindex="0" aria-label="Synchronized viewer. Press the space bar to play or pause; use the time slider or the arrow keys on it to move in time.">
+      <div class="v-controls">
+        <button class="v-play" id="vPlay" type="button" aria-label="Play">
+          <svg class="i-play" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 2.5v11l9-5.5z"/></svg>
+          <svg class="i-pause" viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 2.5h3v11h-3zM9.5 2.5h3v11h-3z"/></svg>
+        </button>
+        <output class="v-time" id="vTime" for="vScrub">t = 4.00 s</output>
+        <label class="v-scrub-wrap" for="vScrub"><span class="sr-only">Time in seconds</span>
+          <input type="range" id="vScrub" min="0" max="18" step="0.04" value="4">
+        </label>
+        <label class="v-speed" for="vSpeed">Speed
+          <select id="vSpeed">
+            <option value="0.25">0.25×</option>
+            <option value="0.5">0.5×</option>
+            <option value="1" selected>1×</option>
+            <option value="2">2×</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="v-grid">
+        <div class="v-left">
+          <div class="v-panel v-skel-wrap">
+            <div class="v-panel-head"><span class="key key-mocap" aria-hidden="true"></span>MoCap skeleton<span class="sep" aria-hidden="true"> · </span><span class="muted v-hint">drag sideways to rotate</span>
+              <button class="v-reset" id="vResetView" type="button">Reset view</button></div>
+            <canvas id="vSkel" class="v-skel" role="img" aria-label="Three-dimensional motion-capture skeleton of the upper body and both hands at the current time."></canvas>
+          </div>
+          <div class="v-panel">
+            <div class="v-panel-head"><span class="key key-gaze" aria-hidden="true"></span>Gaze point<span class="sep" aria-hidden="true"> · </span><span class="muted v-hint">scene-camera image, video not shown</span></div>
+            <canvas id="vGaze" class="v-gaze" role="img" aria-label="Point of regard in the scene-camera image at the current time, with a short trail."></canvas>
+          </div>
+        </div>
+        <div class="v-right">
+          <div class="v-panel v-strip-wrap">
+            <canvas id="vStrip" class="v-strip" role="img" aria-label="Strip chart of annotated segments, EMG envelope, IMU wrist angular speed, gaze position and summed hand pressure over the 18-second window, with a moving time cursor."></canvas>
+          </div>
+          <div class="v-panel v-press-wrap">
+            <div class="v-panel-head"><span class="key key-press" aria-hidden="true"></span>Pressure cells at the cursor<span class="sep" aria-hidden="true"> · </span><span class="muted v-hint">25 per hand, channel order R1–R25 and L1–L25, grams</span></div>
+            <canvas id="vPress" class="v-press" role="img" aria-label="Current force at each of the 50 pressure cells, 25 per hand, in channel order."></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div class="v-seg" id="vSeg" aria-live="polite">
+        <div class="v-seg-empty">Loading the sample data…</div>
+      </div>
+      <p class="v-fallback" id="vFallback" hidden>The sample data (assets/sample.js) could not be loaded, so the viewer is unavailable.</p>
+      <noscript><p class="v-fallback">The interactive viewer needs JavaScript.</p></noscript>
+    </div>
+    <p class="note note-warn"><b>Known offset in this recording.</b> The wrist IMU traces lag the MoCap hand motion by about 0.4 s. The viewer shows the released data unshifted; the offset is under investigation.</p>
+    <p class="fineprint">Display rates: MoCap 25 Hz, EMG envelope 50 Hz (median-removed, rectified, 100 ms moving average), gaze 50 Hz, IMU 50 Hz, pressure 25 Hz, all sampled from the released 100 Hz files. Gaps in the gaze trace are tracking losses. The skeleton is the Qualisys solver output (56 joints plus 10 extrapolated fingertips) and covers the upper body and both hands. Pressure cells are shown in channel order (R1–R25, L1–L25). Segment labels are the released annotations (VLM-generated, then human-checked and corrected) at 1 s resolution.</p>
+  </div>
+</section>
+
+<!-- ============================== SCENES ============================== -->
+<section id="scenes" class="section">
+  <div class="wrap">
+    <header class="sec-head">
+      <h2>Eight long-horizon daily-activity scenarios</h2>
+      <p class="sec-intro">The scenarios span work (office, shipping, packing) and household life (kitchen, dining cleanup and setup, beverage, clothes). Before each recording, volunteers heard a short verbal description of the target scenario; beyond this high-level goal they completed the task in their own style and at their own pace. Each recording is one complete execution of a scenario and chains dozens of sub-actions.</p>
+    </header>
+    <div class="scene-grid">
+      <article class="scene">
+        <div class="scene-media"><img src="assets/img/scene_s1.jpg" width="600" height="600" alt="Office desk organization: overhead photo of the props in their initial state" loading="lazy"></div>
+        <div class="scene-body">
+          <p class="scene-id"><span class="sid">S1</span><span class="cat cat-work">Work</span></p>
+          <h3>Office desk organization</h3>
+          <p class="scene-meta"><span title="Target duration from the paper's scenario description">Target ≈2 min</span><span title="Rows in metadata/recordings.csv of the release">40 recordings</span><span title="Segments in the released annotation files">1,053 segments</span></p>
+          <details>
+            <summary>Instruction and props</summary>
+            <p class="instr">“You just arrived at the office and found your desk in disarray from yesterday. Tidy up the workspace and prepare to start the day&#x27;s work. The desk has assorted office supplies, documents, and electronics. Please organize the desk according to your usual habits and prepare to start working.”</p>
+            <p class="props">Initial state (intentionally cluttered): 5–6 documents scattered on the desk; an overturned pen holder with markers spread out; a stapler, hole punch, and scissors placed haphazardly; a misaligned keyboard and mouse; a water cup resting on a document; tangled charging cables; a wallet; loose tape and small items.</p>
+          </details>
+        </div>
+      </article>
+      <article class="scene">
+        <div class="scene-media"><img src="assets/img/scene_s2.jpg" width="600" height="600" alt="Package shipping preparation: overhead photo of the props in their initial state" loading="lazy"></div>
+        <div class="scene-body">
+          <p class="scene-id"><span class="sid">S2</span><span class="cat cat-work">Work</span></p>
+          <h3>Package shipping preparation</h3>
+          <p class="scene-meta"><span title="Target duration from the paper's scenario description">Target ≈2 min</span><span title="Rows in metadata/recordings.csv of the release">40 recordings</span><span title="Segments in the released annotation files">956 segments</span></p>
+          <details>
+            <summary>Instruction and props</summary>
+            <p class="instr">“You need to ship important documents and small items to a client. Choose appropriate packaging, pack the items safely, seal the package, and move it to a designated location (the top shelf of a rack; note the rack is positioned to challenge occlusion-aware recording).”</p>
+            <p class="props">Available props: 3–4 boxes/envelopes of varying sizes, foam wrap, bubble wrap, documents, small items (USB drives, business-card holders, small gifts), tape, scissors, address labels, shipping forms, markers, an electronic scale, and seal stickers.</p>
+          </details>
+        </div>
+      </article>
+      <article class="scene">
+        <div class="scene-media"><img src="assets/img/scene_s3.jpg" width="600" height="600" alt="Kitchen spice organization: overhead photo of the props in their initial state" loading="lazy"></div>
+        <div class="scene-body">
+          <p class="scene-id"><span class="sid">S3</span><span class="cat cat-home">Household</span></p>
+          <h3>Kitchen spice organization</h3>
+          <p class="scene-meta"><span title="Target duration from the paper's scenario description">Target ≈4 min</span><span title="Rows in metadata/recordings.csv of the release">38 recordings</span><span title="Segments in the released annotation files">991 segments</span></p>
+          <details>
+            <summary>Instruction and props</summary>
+            <p class="instr">“Reorganize the kitchen spice rack. Reposition the bottles by frequency of use, wipe down the bottle exteriors, label them with their contents, transfer loose spice into sealed jars, organize the disposable utensils, and clean the countertop.”</p>
+            <p class="props">Setup: Five half-empty spice bottles plus one full bottle (used to refill an empty one), then re-arranged. Available props: 5 empty spice bottles, 1 sealed jar, kitchen paper, and a cleaning cloth (occlusion-prone—volunteers were instructed on how to minimise marker occlusion).</p>
+          </details>
+        </div>
+      </article>
+      <article class="scene">
+        <div class="scene-media"><img src="assets/img/scene_s4.jpg" width="600" height="600" alt="Post-meal table cleaning: overhead photo of the props in their initial state" loading="lazy"></div>
+        <div class="scene-body">
+          <p class="scene-id"><span class="sid">S4</span><span class="cat cat-home">Household</span></p>
+          <h3>Post-meal table cleaning</h3>
+          <p class="scene-meta"><span title="Target duration from the paper's scenario description">Target ≈3 min</span><span title="Rows in metadata/recordings.csv of the release">38 recordings</span><span title="Segments in the released annotation files">976 segments</span></p>
+          <details>
+            <summary>Instruction and props</summary>
+            <p class="instr">“You just finished eating and need to clean the dining table. Sort and collect the dishes (bowls and plates separately), discard the residue from the plates into the trash, wipe the table with a cloth to clean spilled liquids, organise the used cloths, gather the placemats, and push the chairs back to their original positions.”</p>
+            <p class="props">Available props: Used dishes (3–4 rice bowls, 4–5 plates, 2 soup bowls, 3–4 water cups), simulated food residue (plastic fragments), a trash bin, paper towels and napkins, wet wipes, two cloths (dry/wet), 3–4 condiment bottles (soy sauce, vinegar, chilli oil), 4 placemats, a tray for collecting dishes, a tablecloth, cleaning spray (water), and disposable gloves.</p>
+          </details>
+        </div>
+      </article>
+      <article class="scene">
+        <div class="scene-media"><div class="scene-noimg"><p class="noimg-k">Props</p><ul><li>Tablecloth</li><li>4 place settings</li><li>Chopsticks and spoons</li><li>Teapot and cups</li><li>Flower vase</li><li>Lazy Susan</li></ul></div></div>
+        <div class="scene-body">
+          <p class="scene-id"><span class="sid">S5</span><span class="cat cat-home">Household</span></p>
+          <h3>Pre-meal table setting</h3>
+          <p class="scene-meta"><span title="Target duration from the paper's scenario description">Target ≈1 min 20 s</span><span title="Rows in metadata/recordings.csv of the release">37 recordings</span><span title="Segments in the released annotation files">1,184 segments</span></p>
+          <details>
+            <summary>Instruction and props</summary>
+            <p class="instr">“It&#x27;s almost dinner time, please set the dining table. Lay and smooth the tablecloth (occlusion-prone), set 4 place settings (each with a bowl, plate, chopsticks, and spoon), arrange the napkins and tissue box, place the condiment set in the centre of the table, prepare communal chopsticks and a serving spoon, pour tea into the cups, place a decorative vase, and adjust the chairs. Then bring out the food (a pot plus serving dishes).”</p>
+            <p class="props">Available props: Tablecloth, 4 rice bowls, 8 plates (4 large, 4 small), 4 pairs of chopsticks plus 2 communal pairs, 4 spoons plus 2 communal spoons, a large soup ladle, 4 water/tea cups, 4 placemats, folded napkins, a tissue box, a condiment set on a small tray, a teapot (filled with a small amount of water), a small flower vase, 4 chopstick rests, a Lazy Susan, and wet wipes.</p>
+          </details>
+        </div>
+      </article>
+      <article class="scene">
+        <div class="scene-media"><img src="assets/img/scene_s6.jpg" width="600" height="600" alt="Business-travel luggage packing: overhead photo of the props in their initial state" loading="lazy"></div>
+        <div class="scene-body">
+          <p class="scene-id"><span class="sid">S6</span><span class="cat cat-work">Work</span></p>
+          <h3>Business-travel luggage packing</h3>
+          <p class="scene-meta"><span title="Target duration from the paper's scenario description">Target ≈2 min</span><span title="Rows in metadata/recordings.csv of the release">37 recordings</span><span title="Segments in the released annotation files">842 segments</span></p>
+          <details>
+            <summary>Instruction and props</summary>
+            <p class="instr">“Pack a 3-day business-trip suitcase. Pack the provided items into the suitcase (opened flat to reduce side-wall occlusion). Protect electronics, fold garments appropriately, place toiletries in a toiletry bag, keep documents accessible, and tidy the charging cables. Heavy items go on the bottom, valuables in safe positions, and the suitcase must close cleanly.”</p>
+            <p class="props">Available props: Electronics (a laptop with sleeve, a tablet with case, a portable SSD, a wireless mouse, a USB hub, a foldable keyboard, a phone stand); Charging accessories (laptop / phone / tablet chargers, 2 power banks, 5–6 cables (Type-C, Lightning, USB), a universal travel adapter, a portable power strip, and a cable-organisation pouch); Garments (2 business shirts, 2 T-shirts, 1 dress trousers / 1 casual trousers, 3 sets of underwear, 4 pairs of socks, 1 set of pyjamas, 1 light jacket, 1 tie); Toiletries (travel toiletry bag, toothbrush case, travel-size toiletry kit, shaving kit, 1 towel, sample-size skincare); Office items (a document folder with documents, a notebook and markers, a business-card holder, 2–3 USB drives, a portable stapler); Other (1 pair of leather shoes (with shoe bag), a folding umbrella, a sunglasses case, a noise-cancelling headphone case, a passport sleeve / ID holder, a common-medications case, a sleep mask, earplugs, and tissues).</p>
+          </details>
+        </div>
+      </article>
+      <article class="scene">
+        <div class="scene-media"><div class="scene-noimg"><p class="noimg-k">Props</p><ul><li>Instant coffee</li><li>Milk-tea and cocoa powder</li><li>Tea bags</li><li>Electric kettle</li><li>Mugs and glasses</li><li>Sugar and milk</li></ul></div></div>
+        <div class="scene-body">
+          <p class="scene-id"><span class="sid">S7</span><span class="cat cat-home">Household</span></p>
+          <h3>Coffee and beverage preparation</h3>
+          <p class="scene-meta"><span title="Target duration from the paper's scenario description">Target ≈1 min 15 s</span><span title="Rows in metadata/recordings.csv of the release">37 recordings</span><span title="Segments in the released annotation files">688 segments</span></p>
+          <details>
+            <summary>Instruction and props</summary>
+            <p class="instr">“It&#x27;s afternoon-tea time, please prepare a hot beverage for yourself. There are instant coffee, milk-tea powder, cocoa powder, and other mixes on the table, plus the relevant utensils. Choose a beverage and prepare it according to your usual taste, including selecting an appropriate cup, controlling the water temperature, and adding sugar / milk to taste.”</p>
+            <p class="props">Available props: Mixes (instant coffee (3 brands), milk-tea powder (original and chocolate), instant cereal, honey-yuzu tea, tea bags (green / black / floral)); Utensils (3–4 mugs of varying sizes, 2 glasses, 1 thermos, an electric kettle (pre-filled with water), 3 stirring spoons); Condiments (white sugar (sachets and cubes), milk (carton), cream pods).</p>
+          </details>
+        </div>
+      </article>
+      <article class="scene">
+        <div class="scene-media"><img src="assets/img/scene_s8.jpg" width="600" height="600" alt="Clothes hanging and folding: overhead photo of the props in their initial state" loading="lazy"></div>
+        <div class="scene-body">
+          <p class="scene-id"><span class="sid">S8</span><span class="cat cat-home">Household</span></p>
+          <h3>Clothes hanging and folding</h3>
+          <p class="scene-meta"><span title="Target duration from the paper's scenario description">Target ≈1 min 10 s</span><span title="Rows in metadata/recordings.csv of the release">37 recordings</span><span title="Segments in the released annotation files">1,099 segments</span></p>
+          <details>
+            <summary>Instruction and props</summary>
+            <p class="instr">“The clothes on the drying rack are dry. Please collect all the garments, fold them by category (occlusion-prone), and place them into the wardrobe (a shelf is used in place of a wardrobe; items must be placed on the top shelf only). Pay attention to folding methods for different garment types and to wardrobe organisation.”</p>
+            <p class="props">Available props: Garments on the drying rack (3–4 T-shirts, 2 shirts, 2 pairs of long trousers, 2 pairs of shorts, 2–3 towels, 5–6 pairs of socks, 1 jacket, 1 scarf); Storage tools (10–15 hangers, 3 storage baskets, 4 dividers); Wardrobe configuration (hanging area with a horizontal bar, folded-clothes area with 3 shelves, 2 drawers, top storage compartment).</p>
+          </details>
+        </div>
+      </article>
+    </div>
+    <p class="fineprint swipe-hint">Swipe sideways to see all eight scenarios.</p>
+    <figure class="dotplot">
+      <figcaption><b>Recording length by scenario</b><span>one dot per recording · tick = median · right column = median</span></figcaption>
+      <div class="dp" role="img" aria-label="Dot plot of recording durations for scenarios S1 to S8; medians range from about 0.8 to 2.1 minutes.">
+        <div class="dp-row"><span class="dp-lab">S1</span><div class="dp-track"><span class="dp-dot" style="left:9.26%" data-tip="S1 · 25.0 s"></span><span class="dp-dot" style="left:10.81%" data-tip="S1 · 29.2 s"></span><span class="dp-dot" style="left:10.93%" data-tip="S1 · 29.5 s"></span><span class="dp-dot" style="left:12.85%" data-tip="S1 · 34.7 s"></span><span class="dp-dot" style="left:14.15%" data-tip="S1 · 38.2 s"></span><span class="dp-dot" style="left:14.81%" data-tip="S1 · 40.0 s"></span><span class="dp-dot" style="left:15.81%" data-tip="S1 · 42.7 s"></span><span class="dp-dot" style="left:16.44%" data-tip="S1 · 44.4 s"></span><span class="dp-dot" style="left:16.56%" data-tip="S1 · 44.7 s"></span><span class="dp-dot" style="left:18.44%" data-tip="S1 · 49.8 s"></span><span class="dp-dot" style="left:18.63%" data-tip="S1 · 50.3 s"></span><span class="dp-dot" style="left:19.22%" data-tip="S1 · 51.9 s"></span><span class="dp-dot" style="left:20.15%" data-tip="S1 · 54.4 s"></span><span class="dp-dot" style="left:20.19%" data-tip="S1 · 54.5 s"></span><span class="dp-dot" style="left:21.19%" data-tip="S1 · 57.2 s"></span><span class="dp-dot" style="left:22.37%" data-tip="S1 · 60.4 s"></span><span class="dp-dot" style="left:23.00%" data-tip="S1 · 62.1 s"></span><span class="dp-dot" style="left:23.70%" data-tip="S1 · 64.0 s"></span><span class="dp-dot" style="left:23.89%" data-tip="S1 · 64.5 s"></span><span class="dp-dot" style="left:27.93%" data-tip="S1 · 75.4 s"></span><span class="dp-dot" style="left:28.26%" data-tip="S1 · 76.3 s"></span><span class="dp-dot" style="left:28.93%" data-tip="S1 · 78.1 s"></span><span class="dp-dot" style="left:31.33%" data-tip="S1 · 84.6 s"></span><span class="dp-dot" style="left:31.52%" data-tip="S1 · 85.1 s"></span><span class="dp-dot" style="left:32.70%" data-tip="S1 · 88.3 s"></span><span class="dp-dot" style="left:34.22%" data-tip="S1 · 92.4 s"></span><span class="dp-dot" style="left:34.30%" data-tip="S1 · 92.6 s"></span><span class="dp-dot" style="left:36.30%" data-tip="S1 · 98.0 s"></span><span class="dp-dot" style="left:37.37%" data-tip="S1 · 100.9 s"></span><span class="dp-dot" style="left:38.56%" data-tip="S1 · 104.1 s"></span><span class="dp-dot" style="left:38.63%" data-tip="S1 · 104.3 s"></span><span class="dp-dot" style="left:40.44%" data-tip="S1 · 109.2 s"></span><span class="dp-dot" style="left:40.63%" data-tip="S1 · 109.7 s"></span><span class="dp-dot" style="left:43.96%" data-tip="S1 · 118.7 s"></span><span class="dp-dot" style="left:44.96%" data-tip="S1 · 121.4 s"></span><span class="dp-dot" style="left:54.78%" data-tip="S1 · 147.9 s"></span><span class="dp-dot" style="left:58.26%" data-tip="S1 · 157.3 s"></span><span class="dp-dot" style="left:68.78%" data-tip="S1 · 185.7 s"></span><span class="dp-dot" style="left:71.33%" data-tip="S1 · 192.6 s"></span><span class="dp-med" style="left:27.93%" data-tip="S1 median · 75 s"></span></div><span class="dp-val">1.3 min</span></div>
+        <div class="dp-row"><span class="dp-lab">S2</span><div class="dp-track"><span class="dp-dot" style="left:14.44%" data-tip="S2 · 39.0 s"></span><span class="dp-dot" style="left:15.74%" data-tip="S2 · 42.5 s"></span><span class="dp-dot" style="left:15.81%" data-tip="S2 · 42.7 s"></span><span class="dp-dot" style="left:15.96%" data-tip="S2 · 43.1 s"></span><span class="dp-dot" style="left:16.15%" data-tip="S2 · 43.6 s"></span><span class="dp-dot" style="left:16.44%" data-tip="S2 · 44.4 s"></span><span class="dp-dot" style="left:17.52%" data-tip="S2 · 47.3 s"></span><span class="dp-dot" style="left:18.22%" data-tip="S2 · 49.2 s"></span><span class="dp-dot" style="left:18.33%" data-tip="S2 · 49.5 s"></span><span class="dp-dot" style="left:18.37%" data-tip="S2 · 49.6 s"></span><span class="dp-dot" style="left:18.81%" data-tip="S2 · 50.8 s"></span><span class="dp-dot" style="left:19.07%" data-tip="S2 · 51.5 s"></span><span class="dp-dot" style="left:19.56%" data-tip="S2 · 52.8 s"></span><span class="dp-dot" style="left:19.93%" data-tip="S2 · 53.8 s"></span><span class="dp-dot" style="left:20.89%" data-tip="S2 · 56.4 s"></span><span class="dp-dot" style="left:20.89%" data-tip="S2 · 56.4 s"></span><span class="dp-dot" style="left:21.15%" data-tip="S2 · 57.1 s"></span><span class="dp-dot" style="left:21.59%" data-tip="S2 · 58.3 s"></span><span class="dp-dot" style="left:22.44%" data-tip="S2 · 60.6 s"></span><span class="dp-dot" style="left:22.74%" data-tip="S2 · 61.4 s"></span><span class="dp-dot" style="left:23.44%" data-tip="S2 · 63.3 s"></span><span class="dp-dot" style="left:24.19%" data-tip="S2 · 65.3 s"></span><span class="dp-dot" style="left:24.37%" data-tip="S2 · 65.8 s"></span><span class="dp-dot" style="left:25.11%" data-tip="S2 · 67.8 s"></span><span class="dp-dot" style="left:25.52%" data-tip="S2 · 68.9 s"></span><span class="dp-dot" style="left:26.04%" data-tip="S2 · 70.3 s"></span><span class="dp-dot" style="left:27.19%" data-tip="S2 · 73.4 s"></span><span class="dp-dot" style="left:28.00%" data-tip="S2 · 75.6 s"></span><span class="dp-dot" style="left:29.30%" data-tip="S2 · 79.1 s"></span><span class="dp-dot" style="left:30.15%" data-tip="S2 · 81.4 s"></span><span class="dp-dot" style="left:31.11%" data-tip="S2 · 84.0 s"></span><span class="dp-dot" style="left:31.44%" data-tip="S2 · 84.9 s"></span><span class="dp-dot" style="left:32.15%" data-tip="S2 · 86.8 s"></span><span class="dp-dot" style="left:32.33%" data-tip="S2 · 87.3 s"></span><span class="dp-dot" style="left:33.52%" data-tip="S2 · 90.5 s"></span><span class="dp-dot" style="left:34.33%" data-tip="S2 · 92.7 s"></span><span class="dp-dot" style="left:38.41%" data-tip="S2 · 103.7 s"></span><span class="dp-dot" style="left:47.52%" data-tip="S2 · 128.3 s"></span><span class="dp-dot" style="left:48.93%" data-tip="S2 · 132.1 s"></span><span class="dp-dot" style="left:50.19%" data-tip="S2 · 135.5 s"></span><span class="dp-med" style="left:23.10%" data-tip="S2 median · 62 s"></span></div><span class="dp-val">1.0 min</span></div>
+        <div class="dp-row"><span class="dp-lab">S3</span><div class="dp-track"><span class="dp-dot" style="left:6.52%" data-tip="S3 · 17.6 s"></span><span class="dp-dot" style="left:20.33%" data-tip="S3 · 54.9 s"></span><span class="dp-dot" style="left:24.00%" data-tip="S3 · 64.8 s"></span><span class="dp-dot" style="left:28.26%" data-tip="S3 · 76.3 s"></span><span class="dp-dot" style="left:28.89%" data-tip="S3 · 78.0 s"></span><span class="dp-dot" style="left:30.33%" data-tip="S3 · 81.9 s"></span><span class="dp-dot" style="left:31.26%" data-tip="S3 · 84.4 s"></span><span class="dp-dot" style="left:31.63%" data-tip="S3 · 85.4 s"></span><span class="dp-dot" style="left:33.26%" data-tip="S3 · 89.8 s"></span><span class="dp-dot" style="left:36.96%" data-tip="S3 · 99.8 s"></span><span class="dp-dot" style="left:38.59%" data-tip="S3 · 104.2 s"></span><span class="dp-dot" style="left:39.15%" data-tip="S3 · 105.7 s"></span><span class="dp-dot" style="left:40.44%" data-tip="S3 · 109.2 s"></span><span class="dp-dot" style="left:42.52%" data-tip="S3 · 114.8 s"></span><span class="dp-dot" style="left:44.59%" data-tip="S3 · 120.4 s"></span><span class="dp-dot" style="left:44.67%" data-tip="S3 · 120.6 s"></span><span class="dp-dot" style="left:45.04%" data-tip="S3 · 121.6 s"></span><span class="dp-dot" style="left:45.04%" data-tip="S3 · 121.6 s"></span><span class="dp-dot" style="left:46.81%" data-tip="S3 · 126.4 s"></span><span class="dp-dot" style="left:46.89%" data-tip="S3 · 126.6 s"></span><span class="dp-dot" style="left:53.85%" data-tip="S3 · 145.4 s"></span><span class="dp-dot" style="left:54.07%" data-tip="S3 · 146.0 s"></span><span class="dp-dot" style="left:55.48%" data-tip="S3 · 149.8 s"></span><span class="dp-dot" style="left:56.22%" data-tip="S3 · 151.8 s"></span><span class="dp-dot" style="left:56.85%" data-tip="S3 · 153.5 s"></span><span class="dp-dot" style="left:58.07%" data-tip="S3 · 156.8 s"></span><span class="dp-dot" style="left:58.30%" data-tip="S3 · 157.4 s"></span><span class="dp-dot" style="left:58.59%" data-tip="S3 · 158.2 s"></span><span class="dp-dot" style="left:60.81%" data-tip="S3 · 164.2 s"></span><span class="dp-dot" style="left:61.15%" data-tip="S3 · 165.1 s"></span><span class="dp-dot" style="left:62.48%" data-tip="S3 · 168.7 s"></span><span class="dp-dot" style="left:63.44%" data-tip="S3 · 171.3 s"></span><span class="dp-dot" style="left:63.67%" data-tip="S3 · 171.9 s"></span><span class="dp-dot" style="left:65.37%" data-tip="S3 · 176.5 s"></span><span class="dp-dot" style="left:66.11%" data-tip="S3 · 178.5 s"></span><span class="dp-dot" style="left:69.78%" data-tip="S3 · 188.4 s"></span><span class="dp-dot" style="left:72.37%" data-tip="S3 · 195.4 s"></span><span class="dp-dot" style="left:75.19%" data-tip="S3 · 203.0 s"></span><span class="dp-med" style="left:46.84%" data-tip="S3 median · 126 s"></span></div><span class="dp-val">2.1 min</span></div>
+        <div class="dp-row"><span class="dp-lab">S4</span><div class="dp-track"><span class="dp-dot" style="left:8.52%" data-tip="S4 · 23.0 s"></span><span class="dp-dot" style="left:9.70%" data-tip="S4 · 26.2 s"></span><span class="dp-dot" style="left:13.04%" data-tip="S4 · 35.2 s"></span><span class="dp-dot" style="left:13.89%" data-tip="S4 · 37.5 s"></span><span class="dp-dot" style="left:14.81%" data-tip="S4 · 40.0 s"></span><span class="dp-dot" style="left:15.67%" data-tip="S4 · 42.3 s"></span><span class="dp-dot" style="left:16.00%" data-tip="S4 · 43.2 s"></span><span class="dp-dot" style="left:16.15%" data-tip="S4 · 43.6 s"></span><span class="dp-dot" style="left:16.15%" data-tip="S4 · 43.6 s"></span><span class="dp-dot" style="left:16.89%" data-tip="S4 · 45.6 s"></span><span class="dp-dot" style="left:17.81%" data-tip="S4 · 48.1 s"></span><span class="dp-dot" style="left:18.22%" data-tip="S4 · 49.2 s"></span><span class="dp-dot" style="left:20.37%" data-tip="S4 · 55.0 s"></span><span class="dp-dot" style="left:20.81%" data-tip="S4 · 56.2 s"></span><span class="dp-dot" style="left:21.19%" data-tip="S4 · 57.2 s"></span><span class="dp-dot" style="left:21.74%" data-tip="S4 · 58.7 s"></span><span class="dp-dot" style="left:22.22%" data-tip="S4 · 60.0 s"></span><span class="dp-dot" style="left:22.26%" data-tip="S4 · 60.1 s"></span><span class="dp-dot" style="left:22.37%" data-tip="S4 · 60.4 s"></span><span class="dp-dot" style="left:22.41%" data-tip="S4 · 60.5 s"></span><span class="dp-dot" style="left:22.59%" data-tip="S4 · 61.0 s"></span><span class="dp-dot" style="left:23.44%" data-tip="S4 · 63.3 s"></span><span class="dp-dot" style="left:23.67%" data-tip="S4 · 63.9 s"></span><span class="dp-dot" style="left:25.19%" data-tip="S4 · 68.0 s"></span><span class="dp-dot" style="left:25.37%" data-tip="S4 · 68.5 s"></span><span class="dp-dot" style="left:25.41%" data-tip="S4 · 68.6 s"></span><span class="dp-dot" style="left:25.93%" data-tip="S4 · 70.0 s"></span><span class="dp-dot" style="left:27.26%" data-tip="S4 · 73.6 s"></span><span class="dp-dot" style="left:27.44%" data-tip="S4 · 74.1 s"></span><span class="dp-dot" style="left:27.59%" data-tip="S4 · 74.5 s"></span><span class="dp-dot" style="left:29.78%" data-tip="S4 · 80.4 s"></span><span class="dp-dot" style="left:30.00%" data-tip="S4 · 81.0 s"></span><span class="dp-dot" style="left:32.63%" data-tip="S4 · 88.1 s"></span><span class="dp-dot" style="left:36.44%" data-tip="S4 · 98.4 s"></span><span class="dp-dot" style="left:43.22%" data-tip="S4 · 116.7 s"></span><span class="dp-dot" style="left:47.30%" data-tip="S4 · 127.7 s"></span><span class="dp-dot" style="left:87.15%" data-tip="S4 · 235.3 s"></span><span class="dp-med" style="left:22.38%" data-tip="S4 median · 60 s"></span></div><span class="dp-val">1.0 min</span></div>
+        <div class="dp-row"><span class="dp-lab">S5</span><div class="dp-track"><span class="dp-dot" style="left:7.48%" data-tip="S5 · 20.2 s"></span><span class="dp-dot" style="left:11.11%" data-tip="S5 · 30.0 s"></span><span class="dp-dot" style="left:13.63%" data-tip="S5 · 36.8 s"></span><span class="dp-dot" style="left:18.78%" data-tip="S5 · 50.7 s"></span><span class="dp-dot" style="left:20.85%" data-tip="S5 · 56.3 s"></span><span class="dp-dot" style="left:21.56%" data-tip="S5 · 58.2 s"></span><span class="dp-dot" style="left:22.11%" data-tip="S5 · 59.7 s"></span><span class="dp-dot" style="left:23.44%" data-tip="S5 · 63.3 s"></span><span class="dp-dot" style="left:23.70%" data-tip="S5 · 64.0 s"></span><span class="dp-dot" style="left:24.04%" data-tip="S5 · 64.9 s"></span><span class="dp-dot" style="left:25.67%" data-tip="S5 · 69.3 s"></span><span class="dp-dot" style="left:25.89%" data-tip="S5 · 69.9 s"></span><span class="dp-dot" style="left:26.63%" data-tip="S5 · 71.9 s"></span><span class="dp-dot" style="left:27.33%" data-tip="S5 · 73.8 s"></span><span class="dp-dot" style="left:28.19%" data-tip="S5 · 76.1 s"></span><span class="dp-dot" style="left:29.30%" data-tip="S5 · 79.1 s"></span><span class="dp-dot" style="left:31.41%" data-tip="S5 · 84.8 s"></span><span class="dp-dot" style="left:32.26%" data-tip="S5 · 87.1 s"></span><span class="dp-dot" style="left:32.44%" data-tip="S5 · 87.6 s"></span><span class="dp-dot" style="left:33.41%" data-tip="S5 · 90.2 s"></span><span class="dp-dot" style="left:33.78%" data-tip="S5 · 91.2 s"></span><span class="dp-dot" style="left:34.70%" data-tip="S5 · 93.7 s"></span><span class="dp-dot" style="left:34.96%" data-tip="S5 · 94.4 s"></span><span class="dp-dot" style="left:35.44%" data-tip="S5 · 95.7 s"></span><span class="dp-dot" style="left:36.93%" data-tip="S5 · 99.7 s"></span><span class="dp-dot" style="left:37.00%" data-tip="S5 · 99.9 s"></span><span class="dp-dot" style="left:39.19%" data-tip="S5 · 105.8 s"></span><span class="dp-dot" style="left:39.67%" data-tip="S5 · 107.1 s"></span><span class="dp-dot" style="left:40.11%" data-tip="S5 · 108.3 s"></span><span class="dp-dot" style="left:40.30%" data-tip="S5 · 108.8 s"></span><span class="dp-dot" style="left:43.04%" data-tip="S5 · 116.2 s"></span><span class="dp-dot" style="left:44.85%" data-tip="S5 · 121.1 s"></span><span class="dp-dot" style="left:45.74%" data-tip="S5 · 123.5 s"></span><span class="dp-dot" style="left:48.96%" data-tip="S5 · 132.2 s"></span><span class="dp-dot" style="left:53.59%" data-tip="S5 · 144.7 s"></span><span class="dp-dot" style="left:55.22%" data-tip="S5 · 149.1 s"></span><span class="dp-dot" style="left:89.70%" data-tip="S5 · 242.2 s"></span><span class="dp-med" style="left:32.45%" data-tip="S5 median · 88 s"></span></div><span class="dp-val">1.5 min</span></div>
+        <div class="dp-row"><span class="dp-lab">S6</span><div class="dp-track"><span class="dp-dot" style="left:8.19%" data-tip="S6 · 22.1 s"></span><span class="dp-dot" style="left:8.30%" data-tip="S6 · 22.4 s"></span><span class="dp-dot" style="left:10.81%" data-tip="S6 · 29.2 s"></span><span class="dp-dot" style="left:14.22%" data-tip="S6 · 38.4 s"></span><span class="dp-dot" style="left:14.22%" data-tip="S6 · 38.4 s"></span><span class="dp-dot" style="left:14.63%" data-tip="S6 · 39.5 s"></span><span class="dp-dot" style="left:15.33%" data-tip="S6 · 41.4 s"></span><span class="dp-dot" style="left:16.15%" data-tip="S6 · 43.6 s"></span><span class="dp-dot" style="left:17.33%" data-tip="S6 · 46.8 s"></span><span class="dp-dot" style="left:17.56%" data-tip="S6 · 47.4 s"></span><span class="dp-dot" style="left:18.37%" data-tip="S6 · 49.6 s"></span><span class="dp-dot" style="left:20.74%" data-tip="S6 · 56.0 s"></span><span class="dp-dot" style="left:21.59%" data-tip="S6 · 58.3 s"></span><span class="dp-dot" style="left:21.93%" data-tip="S6 · 59.2 s"></span><span class="dp-dot" style="left:24.07%" data-tip="S6 · 65.0 s"></span><span class="dp-dot" style="left:26.04%" data-tip="S6 · 70.3 s"></span><span class="dp-dot" style="left:26.26%" data-tip="S6 · 70.9 s"></span><span class="dp-dot" style="left:26.41%" data-tip="S6 · 71.3 s"></span><span class="dp-dot" style="left:26.78%" data-tip="S6 · 72.3 s"></span><span class="dp-dot" style="left:28.33%" data-tip="S6 · 76.5 s"></span><span class="dp-dot" style="left:30.63%" data-tip="S6 · 82.7 s"></span><span class="dp-dot" style="left:31.70%" data-tip="S6 · 85.6 s"></span><span class="dp-dot" style="left:31.70%" data-tip="S6 · 85.6 s"></span><span class="dp-dot" style="left:31.74%" data-tip="S6 · 85.7 s"></span><span class="dp-dot" style="left:32.30%" data-tip="S6 · 87.2 s"></span><span class="dp-dot" style="left:33.52%" data-tip="S6 · 90.5 s"></span><span class="dp-dot" style="left:35.70%" data-tip="S6 · 96.4 s"></span><span class="dp-dot" style="left:35.93%" data-tip="S6 · 97.0 s"></span><span class="dp-dot" style="left:36.41%" data-tip="S6 · 98.3 s"></span><span class="dp-dot" style="left:36.85%" data-tip="S6 · 99.5 s"></span><span class="dp-dot" style="left:38.11%" data-tip="S6 · 102.9 s"></span><span class="dp-dot" style="left:40.00%" data-tip="S6 · 108.0 s"></span><span class="dp-dot" style="left:41.59%" data-tip="S6 · 112.3 s"></span><span class="dp-dot" style="left:53.74%" data-tip="S6 · 145.1 s"></span><span class="dp-dot" style="left:58.81%" data-tip="S6 · 158.8 s"></span><span class="dp-dot" style="left:67.89%" data-tip="S6 · 183.3 s"></span><span class="dp-dot" style="left:95.52%" data-tip="S6 · 257.9 s"></span><span class="dp-med" style="left:26.77%" data-tip="S6 median · 72 s"></span></div><span class="dp-val">1.2 min</span></div>
+        <div class="dp-row"><span class="dp-lab">S7</span><div class="dp-track"><span class="dp-dot" style="left:9.19%" data-tip="S7 · 24.8 s"></span><span class="dp-dot" style="left:9.67%" data-tip="S7 · 26.1 s"></span><span class="dp-dot" style="left:10.63%" data-tip="S7 · 28.7 s"></span><span class="dp-dot" style="left:11.30%" data-tip="S7 · 30.5 s"></span><span class="dp-dot" style="left:12.22%" data-tip="S7 · 33.0 s"></span><span class="dp-dot" style="left:12.41%" data-tip="S7 · 33.5 s"></span><span class="dp-dot" style="left:12.63%" data-tip="S7 · 34.1 s"></span><span class="dp-dot" style="left:12.85%" data-tip="S7 · 34.7 s"></span><span class="dp-dot" style="left:13.00%" data-tip="S7 · 35.1 s"></span><span class="dp-dot" style="left:13.15%" data-tip="S7 · 35.5 s"></span><span class="dp-dot" style="left:13.52%" data-tip="S7 · 36.5 s"></span><span class="dp-dot" style="left:14.07%" data-tip="S7 · 38.0 s"></span><span class="dp-dot" style="left:14.37%" data-tip="S7 · 38.8 s"></span><span class="dp-dot" style="left:16.33%" data-tip="S7 · 44.1 s"></span><span class="dp-dot" style="left:16.37%" data-tip="S7 · 44.2 s"></span><span class="dp-dot" style="left:16.37%" data-tip="S7 · 44.2 s"></span><span class="dp-dot" style="left:16.44%" data-tip="S7 · 44.4 s"></span><span class="dp-dot" style="left:17.26%" data-tip="S7 · 46.6 s"></span><span class="dp-dot" style="left:18.33%" data-tip="S7 · 49.5 s"></span><span class="dp-dot" style="left:18.48%" data-tip="S7 · 49.9 s"></span><span class="dp-dot" style="left:18.81%" data-tip="S7 · 50.8 s"></span><span class="dp-dot" style="left:19.59%" data-tip="S7 · 52.9 s"></span><span class="dp-dot" style="left:19.63%" data-tip="S7 · 53.0 s"></span><span class="dp-dot" style="left:19.63%" data-tip="S7 · 53.0 s"></span><span class="dp-dot" style="left:20.63%" data-tip="S7 · 55.7 s"></span><span class="dp-dot" style="left:21.19%" data-tip="S7 · 57.2 s"></span><span class="dp-dot" style="left:21.56%" data-tip="S7 · 58.2 s"></span><span class="dp-dot" style="left:21.89%" data-tip="S7 · 59.1 s"></span><span class="dp-dot" style="left:22.15%" data-tip="S7 · 59.8 s"></span><span class="dp-dot" style="left:24.07%" data-tip="S7 · 65.0 s"></span><span class="dp-dot" style="left:24.56%" data-tip="S7 · 66.3 s"></span><span class="dp-dot" style="left:25.11%" data-tip="S7 · 67.8 s"></span><span class="dp-dot" style="left:26.85%" data-tip="S7 · 72.5 s"></span><span class="dp-dot" style="left:27.89%" data-tip="S7 · 75.3 s"></span><span class="dp-dot" style="left:28.56%" data-tip="S7 · 77.1 s"></span><span class="dp-dot" style="left:30.15%" data-tip="S7 · 81.4 s"></span><span class="dp-dot" style="left:36.00%" data-tip="S7 · 97.2 s"></span><span class="dp-med" style="left:18.34%" data-tip="S7 median · 50 s"></span></div><span class="dp-val">0.8 min</span></div>
+        <div class="dp-row"><span class="dp-lab">S8</span><div class="dp-track"><span class="dp-dot" style="left:15.22%" data-tip="S8 · 41.1 s"></span><span class="dp-dot" style="left:16.96%" data-tip="S8 · 45.8 s"></span><span class="dp-dot" style="left:17.67%" data-tip="S8 · 47.7 s"></span><span class="dp-dot" style="left:19.52%" data-tip="S8 · 52.7 s"></span><span class="dp-dot" style="left:21.48%" data-tip="S8 · 58.0 s"></span><span class="dp-dot" style="left:22.00%" data-tip="S8 · 59.4 s"></span><span class="dp-dot" style="left:23.44%" data-tip="S8 · 63.3 s"></span><span class="dp-dot" style="left:23.67%" data-tip="S8 · 63.9 s"></span><span class="dp-dot" style="left:26.11%" data-tip="S8 · 70.5 s"></span><span class="dp-dot" style="left:26.30%" data-tip="S8 · 71.0 s"></span><span class="dp-dot" style="left:26.41%" data-tip="S8 · 71.3 s"></span><span class="dp-dot" style="left:28.00%" data-tip="S8 · 75.6 s"></span><span class="dp-dot" style="left:28.59%" data-tip="S8 · 77.2 s"></span><span class="dp-dot" style="left:28.63%" data-tip="S8 · 77.3 s"></span><span class="dp-dot" style="left:28.78%" data-tip="S8 · 77.7 s"></span><span class="dp-dot" style="left:30.85%" data-tip="S8 · 83.3 s"></span><span class="dp-dot" style="left:31.78%" data-tip="S8 · 85.8 s"></span><span class="dp-dot" style="left:32.15%" data-tip="S8 · 86.8 s"></span><span class="dp-dot" style="left:32.15%" data-tip="S8 · 86.8 s"></span><span class="dp-dot" style="left:32.63%" data-tip="S8 · 88.1 s"></span><span class="dp-dot" style="left:32.89%" data-tip="S8 · 88.8 s"></span><span class="dp-dot" style="left:33.00%" data-tip="S8 · 89.1 s"></span><span class="dp-dot" style="left:33.37%" data-tip="S8 · 90.1 s"></span><span class="dp-dot" style="left:33.85%" data-tip="S8 · 91.4 s"></span><span class="dp-dot" style="left:34.44%" data-tip="S8 · 93.0 s"></span><span class="dp-dot" style="left:34.81%" data-tip="S8 · 94.0 s"></span><span class="dp-dot" style="left:35.04%" data-tip="S8 · 94.6 s"></span><span class="dp-dot" style="left:37.04%" data-tip="S8 · 100.0 s"></span><span class="dp-dot" style="left:38.67%" data-tip="S8 · 104.4 s"></span><span class="dp-dot" style="left:38.81%" data-tip="S8 · 104.8 s"></span><span class="dp-dot" style="left:39.81%" data-tip="S8 · 107.5 s"></span><span class="dp-dot" style="left:41.26%" data-tip="S8 · 111.4 s"></span><span class="dp-dot" style="left:43.44%" data-tip="S8 · 117.3 s"></span><span class="dp-dot" style="left:47.30%" data-tip="S8 · 127.7 s"></span><span class="dp-dot" style="left:49.59%" data-tip="S8 · 133.9 s"></span><span class="dp-dot" style="left:65.37%" data-tip="S8 · 176.5 s"></span><span class="dp-dot" style="left:67.19%" data-tip="S8 · 181.4 s"></span><span class="dp-med" style="left:32.15%" data-tip="S8 median · 87 s"></span></div><span class="dp-val">1.4 min</span></div>
+        <div class="dp-row dp-axis" aria-hidden="true"><span class="dp-lab"></span><div class="dp-track"><span style="left:0.00%">0</span><span style="left:22.22%">1 min</span><span style="left:44.44%">2</span><span style="left:66.67%">3</span><span style="left:88.89%">4</span></div><span class="dp-val"></span></div>
+      </div>
+      <p class="fineprint">302 non-empty task recordings from the release metadata (<code>metadata/recordings.csv</code>). The paper reports 0.3–4.3 min per recording, mean 1.4 min.</p>
+    </figure>
+    <div class="s9">
+      <div class="s9-head">
+        <p class="eyebrow">S9</p>
+        <h3>Motion-primitive protocol</h3>
+        <p>33 volunteers performed each atomic motion unit in isolation and then a library of common task compositions, about 2.8 hours in total. The subset is designed as a clean, segmentable counterpart to the in-context scenarios, for supervised primitive classification, primitive pretraining with transfer to the daily-activity recordings, and use as a motion library for imitation learning.</p>
+        <p class="note">The current public release contains the S9 sensor recordings but no S9 primitive labels. The primitive groups listed here describe the recording protocol, not a released label set.</p>
+      </div>
+      <div class="s9-groups">
+        <p class="s9-k">Recording protocol · 28 atomic primitives</p>
+          <div class="s9-group"><p class="s9-gname">Hand <span>10</span></p><ul class="chips"><li>reach (forward / up / down / lateral)</li><li>grasp (pinch / power / key)</li><li>release</li><li>rotate wrist</li><li>press (downward force)</li><li>pull (toward self)</li><li>push (away from self)</li><li>slide (lateral translation)</li><li>pinch (two / multi-finger)</li><li>spread (fingers opening)</li></ul></div>
+          <div class="s9-group"><p class="s9-gname">Arm <span>6</span></p><ul class="chips"><li>lift</li><li>lower</li><li>extend</li><li>bend (elbow flexion)</li><li>swing</li><li>circle</li></ul></div>
+          <div class="s9-group"><p class="s9-gname">Body <span>7</span></p><ul class="chips"><li>bend at the waist</li><li>straighten</li><li>squat</li><li>stand up</li><li>turn</li><li>lean</li><li>step</li></ul></div>
+          <div class="s9-group"><p class="s9-gname">Fine-manipulation <span>5</span></p><ul class="chips"><li>insert</li><li>withdraw</li><li>fold</li><li>tear</li><li>wipe (reciprocal motion)</li></ul></div>
+      </div>
+      <details class="s9-comp">
+        <summary>Task compositions (10)</summary>
+        <ul class="plain"><li>Pick-and-place: reach → grasp → lift → move → lower → release</li><li>Container operation: open lid (grasp + rotate / lift), pour (tilt + flow-control + reset), scoop (insert + lift + move)</li><li>Open/close: open drawer (grasp handle + pull), close drawer, press switch</li><li>Organise: fold garment (unfold + fold + flatten), stack, align, sort by category</li><li>Clean: wipe surface (grasp cloth + press + reciprocate), sweep and collect debris</li><li>Pack: tear tape, attach label, wrap and seal a package</li><li>Write: pick up pen, write, turn page</li><li>Assemble / connect: plug power, connect cable, snap part</li><li>Measure: weigh an object, measure a liquid, count items</li><li>Special: hang garment, scoop litter, stir beverage, cut with scissors</li></ul>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== ANNOTATIONS ============================== -->
+<section id="annotations" class="section">
+  <div class="wrap">
+    <header class="sec-head">
+      <h2>Two-level action annotations</h2>
+    </header>
+    <div class="annot-grid">
+      <div class="annot-text">
+        <dl class="levels">
+          <div><dt><span class="lvl">L1</span> Scenario</dt><dd>The high-level goal of a recording, one of 8 classes (for example, post-meal table cleaning).</dd></div>
+          <div><dt><span class="lvl">L2</span> Action segment</dt><dd>A dense temporal segment with a motor primitive from an 18-class vocabulary, the acting hand (left, right or both), the primary manipulated object from a scenario-specific whitelist, and a natural-language description with four text variants.</dd></div>
+        </dl>
+        <p>282 of the 304 task recordings, from 36 volunteers, carry dense segment annotations: 7,356 segments, about 26 per recording. The two levels support goal-conditioned action segmentation, sub-task prediction, hierarchical imitation learning and procedure-level evaluation.</p>
+        <h3 class="h-small">How segments are produced</h3>
+        <p>Segments are generated by a VLM-assisted annotation pipeline. For each recording, compressed first-person eye-tracker video is passed to a vision-language model (Gemini 3 Pro) under a scene-specific structured prompt that injects the fixed 18-primitive vocabulary and a per-scene object whitelist, constraining the output to a closed vocabulary.</p> <p>Every annotated recording was then reviewed by a human segment by segment, and each segment was confirmed or corrected, so all released segments have been checked and corrected by a human.</p>
+        <p class="note">Boundaries have 1 s resolution and describe semantic action intervals, not 100 Hz event timestamps. Sub-second benchmark labels are derived from the synchronized sensor streams.</p>
+        <h3 class="h-small">Motor-primitive vocabulary</h3>
+        <ul class="chips chips-mono"><li>grasp</li><li>hold</li><li>move</li><li>push</li><li>pull</li><li>rotate</li><li>open</li><li>close</li><li>insert</li><li>remove</li><li>place</li><li>pick_up</li><li>put_down</li><li>adjust</li><li>align</li><li>release</li><li class="chip-off" title="In the vocabulary but not used in the released labels">support</li><li>stabilize</li></ul>
+      </div>
+      <div class="annot-example">
+        <p class="code-title">Example record · <code>annotations/v1/s1.json</code>, segment 0</p>
+        <pre class="code code-json"><code>{
+  <span class="k">"segments"</span>: [
+    {
+      <span class="k">"timestamp"</span>: <span class="s">"00:00:03-00:00:05"</span>,
+      <span class="k">"action_annotation"</span>: {
+        <span class="k">"action_name"</span>: <span class="s">"pull"</span>,
+        <span class="k">"hand_type"</span>: <span class="s">"right"</span>,
+        <span class="k">"is_lhand"</span>: <span class="n">0</span>,
+        <span class="k">"is_rhand"</span>: <span class="n">1</span>,
+        <span class="k">"text_key"</span>: <span class="s">"Pull laptop power adapter with right hand."</span>,
+        <span class="k">"text_variants"</span>: [
+          <span class="s">"Pull laptop power adapter with right hand."</span>,
+          <span class="s">"Right hand pulls laptop power adapter."</span>,
+          <span class="s">"Pulling laptop power adapter with right hand."</span>,
+          <span class="s">"Laptop power adapter is pulled by right hand."</span>
+        ],
+        <span class="k">"object_name"</span>: <span class="s">"laptop power adapter"</span>
+      }
+    },
+    …
+  ]
+}</code></pre>
+        <p class="fineprint">This is the first segment in the viewer above (3–5 s). <code>text_variants</code> holds four text variants of the description.</p>
+      </div>
+    </div>
+    <div class="charts">
+      <figure class="chart chart-prim">
+        <figcaption><b>Motor primitives</b><span>segments per class</span></figcaption>
+        <div class="hbars"><div class="hb-row" data-tip="grasp · 1,677 segments (22.8%)"><span class="hb-lab">grasp</span><span class="hb-track"><span class="hb-bar" style="width:100.00%"></span></span><span class="hb-val">1,677</span></div><div class="hb-row" data-tip="move · 1,420 segments (19.3%)"><span class="hb-lab">move</span><span class="hb-track"><span class="hb-bar" style="width:84.68%"></span></span><span class="hb-val">1,420</span></div><div class="hb-row" data-tip="place · 1,218 segments (16.6%)"><span class="hb-lab">place</span><span class="hb-track"><span class="hb-bar" style="width:72.63%"></span></span><span class="hb-val">1,218</span></div><div class="hb-row" data-tip="adjust · 693 segments (9.4%)"><span class="hb-lab">adjust</span><span class="hb-track"><span class="hb-bar" style="width:41.32%"></span></span><span class="hb-val">693</span></div><div class="hb-row" data-tip="pick_up · 451 segments (6.1%)"><span class="hb-lab">pick_up</span><span class="hb-track"><span class="hb-bar" style="width:26.89%"></span></span><span class="hb-val">451</span></div><div class="hb-row" data-tip="put_down · 381 segments (5.2%)"><span class="hb-lab">put_down</span><span class="hb-track"><span class="hb-bar" style="width:22.72%"></span></span><span class="hb-val">381</span></div><div class="hb-row" data-tip="close · 309 segments (4.2%)"><span class="hb-lab">close</span><span class="hb-track"><span class="hb-bar" style="width:18.43%"></span></span><span class="hb-val">309</span></div><div class="hb-row" data-tip="open · 248 segments (3.4%)"><span class="hb-lab">open</span><span class="hb-track"><span class="hb-bar" style="width:14.79%"></span></span><span class="hb-val">248</span></div><div class="hb-row" data-tip="rotate · 233 segments (3.2%)"><span class="hb-lab">rotate</span><span class="hb-track"><span class="hb-bar" style="width:13.89%"></span></span><span class="hb-val">233</span></div><div class="hb-row" data-tip="pull · 199 segments (2.7%)"><span class="hb-lab">pull</span><span class="hb-track"><span class="hb-bar" style="width:11.87%"></span></span><span class="hb-val">199</span></div><div class="hb-row" data-tip="hold · 169 segments (2.3%)"><span class="hb-lab">hold</span><span class="hb-track"><span class="hb-bar" style="width:10.08%"></span></span><span class="hb-val">169</span></div><div class="hb-row" data-tip="remove · 81 segments (1.1%)"><span class="hb-lab">remove</span><span class="hb-track"><span class="hb-bar" style="width:4.83%"></span></span><span class="hb-val">81</span></div><div class="hb-row" data-tip="release · 80 segments (1.1%)"><span class="hb-lab">release</span><span class="hb-track"><span class="hb-bar" style="width:4.77%"></span></span><span class="hb-val">80</span></div><div class="hb-row" data-tip="push · 65 segments (0.9%)"><span class="hb-lab">push</span><span class="hb-track"><span class="hb-bar" style="width:3.88%"></span></span><span class="hb-val">65</span></div><div class="hb-row" data-tip="insert · 65 segments (0.9%)"><span class="hb-lab">insert</span><span class="hb-track"><span class="hb-bar" style="width:3.88%"></span></span><span class="hb-val">65</span></div><div class="hb-row" data-tip="align · 59 segments (0.8%)"><span class="hb-lab">align</span><span class="hb-track"><span class="hb-bar" style="width:3.52%"></span></span><span class="hb-val">59</span></div><div class="hb-row" data-tip="stabilize · 7 segments (0.1%)"><span class="hb-lab">stabilize</span><span class="hb-track"><span class="hb-bar" style="width:0.42%"></span></span><span class="hb-val">7</span></div><div class="hb-row" data-tip="support · 1 segments (0.0%)"><span class="hb-lab">support</span><span class="hb-track"><span class="hb-bar" style="width:0.06%"></span></span><span class="hb-val">1</span></div></div>
+      </figure>
+      <figure class="chart chart-hist">
+        <figcaption><b>Segment length</b><span>seconds, 1 s resolution · median 2 s</span></figcaption>
+        <div class="hgram" role="img" aria-label="Histogram of segment lengths: most segments last 1 or 2 seconds."><div class="hg-col" data-tip="1 s · 3,233 segments"><span class="hg-bar" style="height:100.00%"><span class="hg-val"><span class="v-full">3,233</span><span class="v-short">3.2k</span></span></span></div><div class="hg-col" data-tip="2 s · 2,513 segments"><span class="hg-bar" style="height:77.73%"><span class="hg-val"><span class="v-full">2,513</span><span class="v-short">2.5k</span></span></span></div><div class="hg-col" data-tip="3 s · 698 segments"><span class="hg-bar" style="height:21.59%"><span class="hg-val"><span class="v-full">698</span><span class="v-short">698</span></span></span></div><div class="hg-col" data-tip="4 s · 302 segments"><span class="hg-bar" style="height:9.34%"><span class="hg-val"><span class="v-full">302</span><span class="v-short">302</span></span></span></div><div class="hg-col" data-tip="5 s · 187 segments"><span class="hg-bar" style="height:5.78%"><span class="hg-val"><span class="v-full">187</span><span class="v-short">187</span></span></span></div><div class="hg-col" data-tip="6 s · 120 segments"><span class="hg-bar" style="height:3.71%"><span class="hg-val"><span class="v-full">120</span><span class="v-short">120</span></span></span></div><div class="hg-col" data-tip="7 s · 72 segments"><span class="hg-bar" style="height:2.23%"><span class="hg-val"><span class="v-full">72</span><span class="v-short">72</span></span></span></div><div class="hg-col" data-tip="8 s · 51 segments"><span class="hg-bar" style="height:1.58%"><span class="hg-val"><span class="v-full">51</span><span class="v-short">51</span></span></span></div><div class="hg-col" data-tip="9 s · 36 segments"><span class="hg-bar" style="height:1.11%"><span class="hg-val"><span class="v-full">36</span><span class="v-short">36</span></span></span></div><div class="hg-col" data-tip="10 s · 41 segments"><span class="hg-bar" style="height:1.27%"><span class="hg-val"><span class="v-full">41</span><span class="v-short">41</span></span></span></div></div>
+        <div class="hg-axis" aria-hidden="true"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span><span>10</span></div>
+        <p class="chart-note">7,253 segments last at most 10 s; the remaining 103 are longer and are not shown.</p>
+      </figure>
+      <figure class="chart chart-hand">
+        <figcaption><b>Acting hand</b><span>share of segments</span></figcaption>
+        <div class="stack" role="img" aria-label="Both hands 50.0 percent, right hand 31.7 percent, left hand 18.3 percent."><span class="st-seg st-0" style="flex:3676 1 0" data-tip="Both hands · 3,676 segments (50.0%)"><span class="st-in">50.0%</span></span><span class="st-seg st-1" style="flex:2333 1 0" data-tip="Right · 2,333 segments (31.7%)"><span class="st-in">31.7%</span></span><span class="st-seg st-2" style="flex:1347 1 0" data-tip="Left · 1,347 segments (18.3%)"><span class="st-in">18.3%</span></span></div>
+        <ul class="legend"><li><span class="sw st-0"></span>Both hands <b>50.0%</b> <span class="muted">3,676</span></li><li><span class="sw st-1"></span>Right <b>31.7%</b> <span class="muted">2,333</span></li><li><span class="sw st-2"></span>Left <b>18.3%</b> <span class="muted">1,347</span></li></ul>
+      </figure>
+      <figure class="chart chart-obj">
+        <figcaption><b>Manipulated objects</b><span>top 20 of 54 · segments per object</span></figcaption>
+        <div class="hbars hbars-2col"><div class="hb-row" data-tip="sealed jar · 1,017 segments (13.8%)"><span class="hb-lab">sealed jar</span><span class="hb-track"><span class="hb-bar" style="width:100.00%"></span></span><span class="hb-val">1,017</span></div><div class="hb-row" data-tip="rice bowl · 529 segments (7.2%)"><span class="hb-lab">rice bowl</span><span class="hb-track"><span class="hb-bar" style="width:52.02%"></span></span><span class="hb-val">529</span></div><div class="hb-row" data-tip="tablecloth · 403 segments (5.5%)"><span class="hb-lab">tablecloth</span><span class="hb-track"><span class="hb-bar" style="width:39.63%"></span></span><span class="hb-val">403</span></div><div class="hb-row" data-tip="towel · 397 segments (5.4%)"><span class="hb-lab">towel</span><span class="hb-track"><span class="hb-bar" style="width:39.04%"></span></span><span class="hb-val">397</span></div><div class="hb-row" data-tip="pot · 378 segments (5.1%)"><span class="hb-lab">pot</span><span class="hb-track"><span class="hb-bar" style="width:37.17%"></span></span><span class="hb-val">378</span></div><div class="hb-row" data-tip="tape · 359 segments (4.9%)"><span class="hb-lab">tape</span><span class="hb-track"><span class="hb-bar" style="width:35.30%"></span></span><span class="hb-val">359</span></div><div class="hb-row" data-tip="box · 331 segments (4.5%)"><span class="hb-lab">box</span><span class="hb-track"><span class="hb-bar" style="width:32.55%"></span></span><span class="hb-val">331</span></div><div class="hb-row" data-tip="cloth · 318 segments (4.3%)"><span class="hb-lab">cloth</span><span class="hb-track"><span class="hb-bar" style="width:31.27%"></span></span><span class="hb-val">318</span></div><div class="hb-row" data-tip="pants · 264 segments (3.6%)"><span class="hb-lab">pants</span><span class="hb-track"><span class="hb-bar" style="width:25.96%"></span></span><span class="hb-val">264</span></div><div class="hb-row" data-tip="tea canister · 254 segments (3.5%)"><span class="hb-lab">tea canister</span><span class="hb-track"><span class="hb-bar" style="width:24.98%"></span></span><span class="hb-val">254</span></div><div class="hb-row" data-tip="marker · 237 segments (3.2%)"><span class="hb-lab">marker</span><span class="hb-track"><span class="hb-bar" style="width:23.30%"></span></span><span class="hb-val">237</span></div><div class="hb-row" data-tip="spoon · 233 segments (3.2%)"><span class="hb-lab">spoon</span><span class="hb-track"><span class="hb-bar" style="width:22.91%"></span></span><span class="hb-val">233</span></div><div class="hb-row" data-tip="hanger · 231 segments (3.1%)"><span class="hb-lab">hanger</span><span class="hb-track"><span class="hb-bar" style="width:22.71%"></span></span><span class="hb-val">231</span></div><div class="hb-row" data-tip="laptop · 219 segments (3.0%)"><span class="hb-lab">laptop</span><span class="hb-track"><span class="hb-bar" style="width:21.53%"></span></span><span class="hb-val">219</span></div><div class="hb-row" data-tip="plate · 206 segments (2.8%)"><span class="hb-lab">plate</span><span class="hb-track"><span class="hb-bar" style="width:20.26%"></span></span><span class="hb-val">206</span></div><div class="hb-row" data-tip="toothbrush case · 142 segments (1.9%)"><span class="hb-lab">toothbrush case</span><span class="hb-track"><span class="hb-bar" style="width:13.96%"></span></span><span class="hb-val">142</span></div><div class="hb-row" data-tip="coat · 129 segments (1.8%)"><span class="hb-lab">coat</span><span class="hb-track"><span class="hb-bar" style="width:12.68%"></span></span><span class="hb-val">129</span></div><div class="hb-row" data-tip="cup · 128 segments (1.7%)"><span class="hb-lab">cup</span><span class="hb-track"><span class="hb-bar" style="width:12.59%"></span></span><span class="hb-val">128</span></div><div class="hb-row" data-tip="tea bag · 123 segments (1.7%)"><span class="hb-lab">tea bag</span><span class="hb-track"><span class="hb-bar" style="width:12.09%"></span></span><span class="hb-val">123</span></div><div class="hb-row" data-tip="laptop power adapter · 108 segments (1.5%)"><span class="hb-lab">laptop power adapter</span><span class="hb-track"><span class="hb-bar" style="width:10.62%"></span></span><span class="hb-val">108</span></div></div>
+      </figure>
+    </div>
+    <p class="fineprint">Charts count the released annotation table (<code>annotations_flat/segments.csv</code>): 7,356 segments in 282 recordings. Every listed segment carries a natural-language description and a hand label (right / left / both).</p>
+  </div>
+</section>
+
+<!-- ============================== BENCHMARKS ============================== -->
+<section id="benchmarks" class="section">
+  <div class="wrap">
+    <header class="sec-head">
+      <h2>Benchmarks as <span class="nowrap">multi-axis</span> generalization probes</h2>
+      <p class="sec-intro">Rather than reducing the dataset to a list of activity-recognition tasks, the benchmark identifies axes along which training and deployment conditions can diverge and probes each one: a case study on anticipatory coordination (F0) and five generalization probes (F1–F5) instantiated as tasks T1–T7. Every task uses volunteer-stratified 5-fold cross-validation with disjoint training and test volunteers, so all numbers measure generalization to unseen people. Inputs are anti-alias downsampled from 100 Hz to 20 Hz.</p>
+    </header>
+    <div class="table-wrap">
+      <table class="tbl tbl-axes tbl-stack">
+        <caption class="sr-only">Benchmark axes</caption>
+        <thead><tr><th scope="col">Axis</th><th scope="col">Theme</th><th scope="col">Tasks</th><th scope="col">Shift</th><th scope="col">Headline result</th></tr></thead>
+        <tbody><tr><th scope="row"><span class="fcode">F0</span></th><td class="txt" data-label="">Anticipatory coordination (case study)</td><td data-label="Tasks">Case study</td><td class="txt" data-label="Shift">–</td><td class="num-text txt" data-label="Headline result">EMG onset −568 ± 370 ms; motion onset −586 ± 355 ms before pressure contact (n = 413 clean grasp events)</td></tr><tr><th scope="row"><span class="fcode">F1</span></th><td class="txt" data-label="">Activity recognition under cross-subject</td><td data-label="Tasks">T1–T7</td><td class="txt" data-label="Shift">train subjects → unseen subjects</td><td class="num-text txt" data-label="Headline result">T1 Macro F1 0.626 ± 0.099 (SyncFuse, +5.6 pp over CTR-GCN)</td></tr><tr><th scope="row"><span class="fcode">F2</span></th><td class="txt" data-label="">Robustness to missing modalities</td><td data-label="Tasks">T4</td><td class="txt" data-label="Shift">full sensors → missing sensors</td><td class="num-text txt" data-label="Headline result">F1 0.543 ± 0.034 (4-mod) → 0.391 ± 0.042 (no MoCap) → 0.180 ± 0.030 (EMG only).</td></tr><tr><th scope="row"><span class="fcode">F3</span></th><td class="txt" data-label="">Predictive Contact dynamics</td><td data-label="Tasks">T3, T5</td><td class="txt" data-label="Shift">past window → future state</td><td class="num-text txt" data-label="Headline result">T3: AUC 0.697 ± 0.028 (anticipation); T5: F1 lift +0.169 (adding pressure).</td></tr><tr><th scope="row"><span class="fcode">F4</span></th><td class="txt" data-label="">Cross-modal physical-signal regression</td><td data-label="Tasks">T6, T7</td><td class="txt" data-label="Shift">EMG/MoCap → pressure or hand pose</td><td class="num-text txt" data-label="Headline result">T6: r_max 0.372 ± 0.072; T7: MPJPE 11.85 ± 0.47 mm</td></tr><tr><th scope="row"><span class="fcode">F5</span></th><td class="txt" data-label="">Few-shot transfer from isolated primitives</td><td data-label="Tasks">T2 (S9)</td><td class="txt" data-label="Shift">isolated primitives → daily actions</td><td class="num-text txt" data-label="Headline result">At 5% of T2 labels: verb_composite@1 +4.1 pp (+2.4σ over 5 folds)</td></tr></tbody>
+      </table>
+    </div>
+    <h3 class="h-sub">Tasks</h3>
+    <div class="table-wrap">
+      <table class="tbl tbl-tasks tbl-stack">
+        <caption class="sr-only">Benchmark tasks</caption>
+        <thead><tr><th scope="col">Task</th><th scope="col">Definition</th><th scope="col">Level</th><th scope="col">Input → output</th><th scope="col">Metric</th><th scope="col" class="num">Volunteers</th></tr></thead>
+        <tbody><tr><th scope="row"><span class="tcode">T1</span></th><td class="txt" data-label=""><b>Scene Recognition</b><span class="tdesc">Predict which of the 8 scenarios a complete multi-modal recording shows.</span></td><td data-label="Level">Sequence</td><td class="txt" data-label="Input → output">recording → scene</td><td class="txt" data-label="Metric">Macro F1</td><td class="num" data-label="Volunteers">33</td></tr><tr><th scope="row"><span class="tcode">T2</span></th><td class="txt" data-label=""><b>Fine-grained Action Recognition</b><span class="tdesc">For each annotated segment, predict fine verb (17), composite verb (6), noun (34) and hand (3).</span></td><td data-label="Level">Segment</td><td class="txt" data-label="Input → output">segment window → verb, noun, hand</td><td class="txt" data-label="Metric">act_vn@5 (joint top-5 verb–noun accuracy; chance ≈ 4.3%)</td><td class="num" data-label="Volunteers">27</td></tr><tr><th scope="row"><span class="tcode">T3</span></th><td class="txt" data-label=""><b>Grasp Onset Anticipation</b><span class="tdesc">From the preceding 1.0 s window, predict whether a grasp contact occurs in the next 500 ms.</span></td><td data-label="Level">Window</td><td class="txt" data-label="Input → output">1 s window → contact within 500 ms?</td><td class="txt" data-label="Metric">AUC, AP</td><td class="num" data-label="Volunteers">36</td></tr><tr><th scope="row"><span class="tcode">T4</span></th><td class="txt" data-label=""><b>Missing-Modality Robustness</b><span class="tdesc">Scene recognition with modalities removed at test time; one late-fusion Transformer trained with or without modality dropout.</span></td><td data-label="Level">Sequence</td><td class="txt" data-label="Input → output">4 core modalities, some removed → scene</td><td class="txt" data-label="Metric">F1 across 8 test configurations</td><td class="num" data-label="Volunteers">33</td></tr><tr><th scope="row"><span class="tcode">T5</span></th><td class="txt" data-label=""><b>Tactile-driven Grasp State Recognition (TGSR)</b><span class="tdesc">Predict the future grasp state (no grasp, attempted, sustained) from a past window, with forearm EMG alone or EMG plus pressure.</span></td><td data-label="Level">Frame</td><td class="txt" data-label="Input → output">past window → future grasp state</td><td class="txt" data-label="Metric">3-class macro F1; per-class F1</td><td class="num" data-label="Volunteers">27</td></tr><tr><th scope="row"><span class="tcode">T6</span></th><td class="txt" data-label=""><b>Cross-Modal Pressure Prediction</b><span class="tdesc">Regress finger-level pressure from non-tactile signals: right-hand summed force (T6a) or the 50-cell distribution (T6b).</span></td><td data-label="Level">Frame</td><td class="txt" data-label="Input → output">EMG / hand MoCap → pressure</td><td class="txt" data-label="Metric">Pearson r (T6a); r_max over 50 cells (T6b)</td><td class="num" data-label="Volunteers">27</td></tr><tr><th scope="row"><span class="tcode">T7</span></th><td class="txt" data-label=""><b>EMG-to-Hand-Pose Reconstruction</b> <span class="tag tag-ext">extension</span><span class="tdesc">Reconstruct 21 dominant-hand joints per frame from forearm sEMG alone.</span></td><td data-label="Level">Frame</td><td class="txt" data-label="Input → output">EMG → 63-D hand pose</td><td class="txt" data-label="Metric">MPJPE, fingertip MPJPE (mm); bone angle error (°)</td><td class="num" data-label="Volunteers"><span>40<a class="fn" href="#fn-t7" aria-label="note on the T7 pool">*</a></span></td></tr></tbody>
+      </table>
+    </div>
+    <p class="fineprint" id="fn-t7"><b>*</b> T7 pool as stated in the paper: 40 volunteers with aligned EMG and dominant-hand MoCap. The release metadata list S1–S8 motion capture for 33 volunteers, so this pool size is awaiting confirmation by the authors.</p>
+    <h3 class="h-sub">Results</h3>
+    <p class="sec-note">Mean ± std across the five folds, as reported in the paper. Highlighted rows are the best entry for the task's headline metric.</p>
+    <div class="tabs" id="resultTabs">
+      <div class="tablist" role="tablist" aria-label="Benchmark results by task"><button class="tab" role="tab" id="tab-T1" aria-controls="panel-T1" aria-selected="true" tabindex="0" type="button" title="Scene recognition"><span class="tcode">T1</span> Scene</button><button class="tab" role="tab" id="tab-T2" aria-controls="panel-T2" aria-selected="false" tabindex="-1" type="button" title="Fine-grained action recognition"><span class="tcode">T2</span> Action</button><button class="tab" role="tab" id="tab-T3" aria-controls="panel-T3" aria-selected="false" tabindex="-1" type="button" title="Grasp onset anticipation"><span class="tcode">T3</span> Grasp onset</button><button class="tab" role="tab" id="tab-T4" aria-controls="panel-T4" aria-selected="false" tabindex="-1" type="button" title="Missing-modality robustness"><span class="tcode">T4</span> Missing modality</button><button class="tab" role="tab" id="tab-T5" aria-controls="panel-T5" aria-selected="false" tabindex="-1" type="button" title="Tactile-driven grasp state"><span class="tcode">T5</span> Grasp state</button><button class="tab" role="tab" id="tab-T6" aria-controls="panel-T6" aria-selected="false" tabindex="-1" type="button" title="Cross-modal pressure prediction"><span class="tcode">T6</span> Pressure</button><button class="tab" role="tab" id="tab-T7" aria-controls="panel-T7" aria-selected="false" tabindex="-1" type="button" title="EMG to hand pose"><span class="tcode">T7</span> Hand pose</button></div>
+      <div class="tab-panel" role="tabpanel" id="panel-T1" aria-labelledby="tab-T1" tabindex="0"><h4 class="panel-title"><span class="tcode">T1</span> Scene recognition</h4><div class="table-wrap"><table class="tbl tbl-res tbl-stack"><caption>T1 scene recognition. 33-volunteer pool, 5-fold CV, 1 seed per fold; Macro F1 on 8 scenes.</caption><thead><tr><th scope="col">Method</th><th scope="col">Year</th><th scope="col">Modalities</th><th scope="col" class="num">Macro F1</th><th scope="col" class="num">Accuracy</th><th scope="col" class="num">Params</th></tr></thead><tbody><tr><th scope="row">EMG-CNN (sEMG literature)</th><td data-label="Year">2021</td><td class="wide" data-label="Modalities">EMG only</td><td class="num" data-label="Macro F1">0.236 ± 0.016</td><td class="num" data-label="Accuracy">0.271 ± 0.014</td><td class="num" data-label="Params">146K</td></tr><tr><th scope="row">LIMU-BERT</th><td data-label="Year">2021</td><td class="wide" data-label="Modalities">IMU only</td><td class="num" data-label="Macro F1">0.379 ± 0.076</td><td class="num" data-label="Accuracy">0.404 ± 0.062</td><td class="num" data-label="Params">1.3M</td></tr><tr><th scope="row">Perceiver IO</th><td data-label="Year">2022</td><td class="wide" data-label="Modalities">4-mod</td><td class="num" data-label="Macro F1">0.472 ± 0.091</td><td class="num" data-label="Accuracy">0.475 ± 0.092</td><td class="num" data-label="Params">1.4M</td></tr><tr><th scope="row">ST-GCN</th><td data-label="Year">2018</td><td class="wide" data-label="Modalities">MoCap skeleton</td><td class="num" data-label="Macro F1">0.523 ± 0.035</td><td class="num" data-label="Accuracy">0.544 ± 0.019</td><td class="num" data-label="Params">7.0M</td></tr><tr><th scope="row">MulT</th><td data-label="Year">2019</td><td class="wide" data-label="Modalities">3-mod (MoCap+EMG+IMU)</td><td class="num" data-label="Macro F1">0.549 ± 0.041</td><td class="num" data-label="Accuracy">0.547 ± 0.053</td><td class="num" data-label="Params">3.9M</td></tr><tr><th scope="row">Transformer+Late+Pretrain <span class="tag tag-ours">ours</span></th><td data-label="Year">2026</td><td class="wide" data-label="Modalities">4-mod</td><td class="num" data-label="Macro F1">0.551 ± 0.077</td><td class="num" data-label="Accuracy">0.554 ± 0.069</td><td class="num" data-label="Params">3.8M</td></tr><tr><th scope="row">ActionSense (LSTM)</th><td data-label="Year">2022</td><td class="wide" data-label="Modalities">4-mod (MoCap+EMG+Eye+IMU)</td><td class="num" data-label="Macro F1">0.566 ± 0.093</td><td class="num" data-label="Accuracy">0.570 ± 0.094</td><td class="num" data-label="Params">1.2M</td></tr><tr><th scope="row">CTR-GCN</th><td data-label="Year">2021</td><td class="wide" data-label="Modalities">MoCap skeleton</td><td class="num" data-label="Macro F1">0.570 ± 0.120</td><td class="num" data-label="Accuracy">0.589 ± 0.112</td><td class="num" data-label="Params">3.8M</td></tr><tr class="is-best"><th scope="row">SyncFuse <span class="tag tag-ours">ours</span></th><td data-label="Year">2026</td><td class="wide" data-label="Modalities">5-mod (incl. Pressure)</td><td class="num" data-label="Macro F1">0.626 ± 0.099</td><td class="num" data-label="Accuracy">0.633 ± 0.083</td><td class="num" data-label="Params">1.6M</td></tr></tbody></table></div><p class="tab-note">Single-modality baselines split sharply: EMG-only and IMU-only methods lag the MoCap-skeleton methods, which rival the strongest 4-modality fusion methods. Naive fusion is not universally helpful: Perceiver IO (4 modalities) underperforms single-modality MoCap baselines. Cross-fold standard deviations reach 0.10–0.12 for the strongest methods.</p></div><div class="tab-panel" role="tabpanel" id="panel-T2" aria-labelledby="tab-T2" tabindex="0"><h4 class="panel-title"><span class="tcode">T2</span> Fine-grained action recognition</h4><div class="table-wrap"><table class="tbl tbl-res tbl-stack"><caption>T2 action recognition. 27-volunteer pool, 5-fold CV, 1 seed per fold. 17 verbs × 34 nouns = 578 joint cells; chance act_vn@5 ≈ 4.3%.</caption><thead><tr><th scope="col">Method</th><th scope="col">Year</th><th scope="col">Modalities</th><th scope="col" class="num">act_vn@5</th><th scope="col" class="num">verb_fine@5</th><th scope="col" class="num">noun@5</th></tr></thead><tbody><tr><th scope="row">DeepConvLSTM (IMU)</th><td data-label="Year">2016</td><td class="wide" data-label="Modalities">IMU</td><td class="num" data-label="act_vn@5">0.296 ± 0.011</td><td class="num" data-label="verb_fine@5">0.733 ± 0.015</td><td class="num" data-label="noun@5">0.394 ± 0.016</td></tr><tr><th scope="row">ActionLLM (surrogate)</th><td data-label="Year">2025</td><td class="wide" data-label="Modalities">IMU+EMG+Eye</td><td class="num" data-label="act_vn@5">0.313 ± 0.044</td><td class="num" data-label="verb_fine@5">0.758 ± 0.016</td><td class="num" data-label="noun@5">0.419 ± 0.069</td></tr><tr><th scope="row">RU-LSTM</th><td data-label="Year">2019</td><td class="wide" data-label="Modalities">IMU+MoCap</td><td class="num" data-label="act_vn@5">0.319 ± 0.031</td><td class="num" data-label="verb_fine@5">0.747 ± 0.024</td><td class="num" data-label="noun@5">0.433 ± 0.043</td></tr><tr><th scope="row">DeepConvLSTM (3 mod)</th><td data-label="Year">2016</td><td class="wide" data-label="Modalities">IMU+MoCap+EMG</td><td class="num" data-label="act_vn@5">0.344 ± 0.038</td><td class="num" data-label="verb_fine@5">0.764 ± 0.021</td><td class="num" data-label="noun@5">0.441 ± 0.024</td></tr><tr><th scope="row">AFFT</th><td data-label="Year">2023</td><td class="wide" data-label="Modalities">IMU+EMG+Eye+MoCap</td><td class="num" data-label="act_vn@5">0.370 ± 0.020</td><td class="num" data-label="verb_fine@5">0.770 ± 0.024</td><td class="num" data-label="noun@5">0.480 ± 0.034</td></tr><tr><th scope="row">FUTR</th><td data-label="Year">2022</td><td class="wide" data-label="Modalities">MoCap+IMU+EMG</td><td class="num" data-label="act_vn@5">0.384 ± 0.033</td><td class="num" data-label="verb_fine@5">0.780 ± 0.017</td><td class="num" data-label="noun@5">0.489 ± 0.044</td></tr><tr><th scope="row">HandFormer</th><td data-label="Year">2024</td><td class="wide" data-label="Modalities">MoCap</td><td class="num" data-label="act_vn@5">0.388 ± 0.038</td><td class="num" data-label="verb_fine@5">0.769 ± 0.027</td><td class="num" data-label="noun@5">0.493 ± 0.049</td></tr><tr class="is-best"><th scope="row">DailyActFormer <span class="tag tag-ours">ours</span></th><td data-label="Year">2026</td><td class="wide" data-label="Modalities">IMU+EMG+Eye+MoCap+Pressure</td><td class="num" data-label="act_vn@5">0.403 ± 0.029</td><td class="num" data-label="verb_fine@5">0.788 ± 0.011</td><td class="num" data-label="noun@5">0.512 ± 0.036</td></tr></tbody></table></div><h4 class="tab-h">Transfer from isolated primitives (F5)</h4><p class="tab-note">Pretraining on the S9 motion-primitive recordings helps when T2 labels are scarce and the benefit fades as downstream supervision grows (2-modality DailyActFormer, EMG + IMU; pretraining pool of 7 volunteers disjoint from all T2 folds; seed 42).</p><div class="table-wrap"><table class="tbl tbl-res tbl-stack"><thead><tr><th scope="col">T2 train fraction</th><th scope="col" class="num">Baseline verb_comp@1</th><th scope="col" class="num">+ Motion-primitive pretrain</th><th scope="col" class="num">Δ</th><th scope="col" class="num">Significance</th></tr></thead><tbody><tr class="is-best"><th scope="row">5%</th><td class="num" data-label="Baseline verb_comp@1">0.275 ± 0.017</td><td class="num" data-label="+ Motion-primitive pretrain">0.316 ± 0.018</td><td class="num" data-label="Δ">+0.041</td><td class="num" data-label="Significance">+2.4σ</td></tr><tr><th scope="row">10%</th><td class="num" data-label="Baseline verb_comp@1">0.278 ± 0.009</td><td class="num" data-label="+ Motion-primitive pretrain">0.307 ± 0.014</td><td class="num" data-label="Δ">+0.029</td><td class="num" data-label="Significance">+3.2σ</td></tr><tr><th scope="row">25%</th><td class="num" data-label="Baseline verb_comp@1">0.288 ± 0.020</td><td class="num" data-label="+ Motion-primitive pretrain">0.297 ± 0.018</td><td class="num" data-label="Δ">+0.009</td><td class="num" data-label="Significance">+0.5σ</td></tr><tr><th scope="row">50%</th><td class="num" data-label="Baseline verb_comp@1">0.305 ± 0.023</td><td class="num" data-label="+ Motion-primitive pretrain">0.303 ± 0.020</td><td class="num" data-label="Δ">−0.003</td><td class="num" data-label="Significance">—</td></tr><tr><th scope="row">100%</th><td class="num" data-label="Baseline verb_comp@1">0.309 ± 0.014</td><td class="num" data-label="+ Motion-primitive pretrain">0.306 ± 0.013</td><td class="num" data-label="Δ">−0.003</td><td class="num" data-label="Significance">—</td></tr></tbody></table></div><figure class="figure figure-mid"><a class="plate zoom" href="assets/img/s9_pretrain_t2_data_fraction.png" target="_blank" rel="noopener" title="Open the full-size image"><img src="assets/img/s9_pretrain_t2_data_fraction.png" width="1000" height="628" alt="Line chart of verb_composite top-1 accuracy against T2 training fraction for baseline and primitive-pretrained models; pretraining is higher at 5 and 10 percent and the curves converge by 50 percent." loading="lazy"></a><figcaption>Error bars: 1 std across 5 folds. <a class="full" href="assets/img/s9_pretrain_t2_data_fraction.png" target="_blank" rel="noopener">Full size</a></figcaption></figure></div><div class="tab-panel" role="tabpanel" id="panel-T3" aria-labelledby="tab-T3" tabindex="0"><h4 class="panel-title"><span class="tcode">T3</span> Grasp onset anticipation</h4><div class="table-wrap"><table class="tbl tbl-res tbl-stack"><caption>T3 grasp onset anticipation (Transformer). 36-volunteer pool, 5-fold CV, 1 seed per fold (EMG+IMU: 4 folds). About 70% of test windows are positive, so AUC and AP are the robust metrics.</caption><thead><tr><th scope="col">Modalities</th><th scope="col" class="num">Acc</th><th scope="col" class="num">F1</th><th scope="col" class="num">AUC</th><th scope="col" class="num">AP</th><th scope="col" class="num">Test pos frac</th></tr></thead><tbody><tr><th scope="row">EMG</th><td class="num" data-label="Acc">0.630 ± 0.046</td><td class="num" data-label="F1">0.723 ± 0.057</td><td class="num" data-label="AUC">0.646 ± 0.033</td><td class="num" data-label="AP">0.708 ± 0.050</td><td class="num" data-label="Test pos frac">0.700</td></tr><tr><th scope="row">EMG+IMU</th><td class="num" data-label="Acc">0.610 ± 0.034</td><td class="num" data-label="F1">0.712 ± 0.028</td><td class="num" data-label="AUC">0.609 ± 0.042</td><td class="num" data-label="AP">0.679 ± 0.072</td><td class="num" data-label="Test pos frac">0.700</td></tr><tr class="is-best"><th scope="row">MoCap+EMG+IMU+EyeTrack</th><td class="num" data-label="Acc">0.662 ± 0.017</td><td class="num" data-label="F1">0.733 ± 0.026</td><td class="num" data-label="AUC">0.697 ± 0.028</td><td class="num" data-label="AP">0.742 ± 0.037</td><td class="num" data-label="Test pos frac">0.700</td></tr></tbody></table></div><p class="tab-note">The full four-modality input predicts grasp onset best; EMG alone is the strongest single modality, and adding IMU to EMG hurts. Which modalities are added matters more than how many.</p></div><div class="tab-panel" role="tabpanel" id="panel-T4" aria-labelledby="tab-T4" tabindex="0"><h4 class="panel-title"><span class="tcode">T4</span> Missing-modality robustness</h4><div class="table-wrap"><table class="tbl tbl-res tbl-stack"><caption>T4 missing-modality robustness. Test F1 on 8 scenes, 33-volunteer pool. Baseline: 1 seed × 5 folds; dropout p = 0.3: 3 seeds × 5 folds.</caption><thead><tr><th scope="col">Eval configuration</th><th scope="col">Active modalities</th><th scope="col" class="num">Baseline (no drop)</th><th scope="col" class="num">Dropout p=0.3</th></tr></thead><tbody><tr><th scope="row">Full</th><td class="wide" data-label="Active modalities">MoCap, EMG, Eye, IMU</td><td class="num" data-label="Baseline (no drop)">0.516 ± 0.060</td><td class="num" data-label="Dropout p=0.3">0.543 ± 0.034</td></tr><tr><th scope="row">drop MoCap</th><td class="wide" data-label="Active modalities">EMG, Eye, IMU</td><td class="num" data-label="Baseline (no drop)">0.296 ± 0.065</td><td class="num" data-label="Dropout p=0.3">0.391 ± 0.042</td></tr><tr><th scope="row">drop EMG</th><td class="wide" data-label="Active modalities">MoCap, Eye, IMU</td><td class="num" data-label="Baseline (no drop)">0.514 ± 0.070</td><td class="num" data-label="Dropout p=0.3">0.535 ± 0.034</td></tr><tr><th scope="row">drop EyeTrack</th><td class="wide" data-label="Active modalities">MoCap, EMG, IMU</td><td class="num" data-label="Baseline (no drop)">0.499 ± 0.056</td><td class="num" data-label="Dropout p=0.3">0.527 ± 0.033</td></tr><tr><th scope="row">drop IMU</th><td class="wide" data-label="Active modalities">MoCap, EMG, Eye</td><td class="num" data-label="Baseline (no drop)">0.349 ± 0.040</td><td class="num" data-label="Dropout p=0.3">0.447 ± 0.064</td></tr><tr><th scope="row">only MoCap</th><td class="wide" data-label="Active modalities">MoCap</td><td class="num" data-label="Baseline (no drop)">0.361 ± 0.085</td><td class="num" data-label="Dropout p=0.3">0.429 ± 0.050</td></tr><tr><th scope="row">only EMG</th><td class="wide" data-label="Active modalities">EMG</td><td class="num" data-label="Baseline (no drop)">0.126 ± 0.025</td><td class="num" data-label="Dropout p=0.3">0.180 ± 0.030</td></tr><tr><th scope="row">only IMU</th><td class="wide" data-label="Active modalities">IMU</td><td class="num" data-label="Baseline (no drop)">0.298 ± 0.030</td><td class="num" data-label="Dropout p=0.3">0.360 ± 0.059</td></tr></tbody></table></div><p class="tab-note">Training with modality dropout raises full-modality F1 by 2.7 pp and improves every leave-one-out and single-modality configuration. MoCap and IMU carry most of the scene signal: removing MoCap costs 15.2 pp and removing IMU 9.6 pp, while EMG and eye tracking change F1 by at most 1.6 pp at this data scale.</p></div><div class="tab-panel" role="tabpanel" id="panel-T5" aria-labelledby="tab-T5" tabindex="0"><h4 class="panel-title"><span class="tcode">T5</span> Tactile-driven grasp state</h4><div class="table-wrap"><table class="tbl tbl-res tbl-stack"><caption>T5 tactile-driven grasp state recognition. 3-class macro F1 with and without pressure as a side-channel; 27-volunteer pool, 5-fold CV, 1 seed per fold.</caption><thead><tr><th scope="col">Backbone</th><th scope="col" class="num">F1 (EMG only)</th><th scope="col" class="num">F1 (EMG + Pressure)</th><th scope="col" class="num">Lift</th></tr></thead><tbody><tr><th scope="row">DAF</th><td class="num" data-label="F1 (EMG only)">0.375 ± 0.021</td><td class="num" data-label="F1 (EMG + Pressure)">0.450 ± 0.034</td><td class="num" data-label="Lift">+0.075 ± 0.030</td></tr><tr class="is-best"><th scope="row">FUTR</th><td class="num" data-label="F1 (EMG only)">0.369 ± 0.023</td><td class="num" data-label="F1 (EMG + Pressure)">0.461 ± 0.018</td><td class="num" data-label="Lift">+0.091 ± 0.030</td></tr><tr><th scope="row">DeepConvLSTM</th><td class="num" data-label="F1 (EMG only)">0.370 ± 0.019</td><td class="num" data-label="F1 (EMG + Pressure)">0.441 ± 0.020</td><td class="num" data-label="Lift">+0.070 ± 0.029</td></tr><tr class="is-summary"><th scope="row">3-bb avg (n=15)</th><td class="num" data-label="F1 (EMG only)">0.372 ± 0.020</td><td class="num" data-label="F1 (EMG + Pressure)">0.450 ± 0.025</td><td class="num" data-label="Lift">+0.079</td></tr></tbody></table></div><div class="table-wrap"><table class="tbl tbl-res tbl-stack"><caption>Per-class F1, 3 backbones × 5 folds (n = 15 paired runs per row).</caption><thead><tr><th scope="col">Class</th><th scope="col" class="num">F1 (EMG only)</th><th scope="col" class="num">F1 (EMG + Pressure)</th><th scope="col" class="num">Lift</th></tr></thead><tbody><tr><th scope="row">NoGrasp</th><td class="num" data-label="F1 (EMG only)">0.475 ± 0.050</td><td class="num" data-label="F1 (EMG + Pressure)">0.426 ± 0.070</td><td class="num" data-label="Lift">−0.049</td></tr><tr><th scope="row">AttemptedGrasp</th><td class="num" data-label="F1 (EMG only)">0.330 ± 0.045</td><td class="num" data-label="F1 (EMG + Pressure)">0.446 ± 0.053</td><td class="num" data-label="Lift">+0.116</td></tr><tr class="is-best"><th scope="row">SustainedGrasp</th><td class="num" data-label="F1 (EMG only)">0.309 ± 0.045</td><td class="num" data-label="F1 (EMG + Pressure)">0.478 ± 0.014</td><td class="num" data-label="Lift">+0.169</td></tr></tbody></table></div><p class="tab-note">Adding pressure to forearm EMG lifts SustainedGrasp F1 by +0.169 ± 0.015: kinematic signals alone cannot tell contact without object control from stable control.</p><details class="tab-details"><summary>How T5 labels are derived</summary><figure class="figure"><a class="plate zoom" href="assets/img/t5_tgsr_method.png" target="_blank" rel="noopener" title="Open the full-size image"><img src="assets/img/t5_tgsr_method.png" width="1400" height="716" alt="Three aligned timelines for one recording: verb annotation, number of active pressure cells with contact shading, and the derived 3-class label every 0.25 s, next to a decision tree for NoGrasp, Attempted and Sustained." loading="lazy"></a><figcaption>Label derivation: verb timeline, pressure contact mask (≥ 3 active cells above 10 g) and the derived 3-class anchor label every 0.25 s. Model inputs stop at the anchor time; future pressure is used only to derive labels. <a class="full" href="assets/img/t5_tgsr_method.png" target="_blank" rel="noopener">Full size</a></figcaption></figure></details></div><div class="tab-panel" role="tabpanel" id="panel-T6" aria-labelledby="tab-T6" tabindex="0"><h4 class="panel-title"><span class="tcode">T6</span> Cross-modal pressure prediction</h4><div class="table-wrap"><table class="tbl tbl-res tbl-stack"><caption>T6 cross-modal pressure prediction. T6a: Pearson r of the right-hand summed pressure, 1 seed × 5 folds. T6b: r_max, the maximum Pearson correlation across the 50 cells; the single-seed CV mean uses 3 seeds × 5 folds, and the within-fold ensemble averages the predictions of 2 matched seeds in each fold. 27-volunteer pool, volunteer-stratified 5-fold CV.</caption><thead><tr><th scope="col">Sub-task</th><th scope="col">Method</th><th scope="col">Year</th><th scope="col">Modality</th><th scope="col" class="num">Single-seed CV r</th><th scope="col" class="num">Within-fold ensemble r</th></tr></thead><tbody><tr class="is-best"><th scope="row">T6a</th><td class="wide" data-label="Method">Pham BiLSTM</td><td data-label="Year">2018</td><td class="wide" data-label="Modality">EMG only</td><td class="num" data-label="Single-seed CV r">0.172 ± 0.151</td><td class="num" data-label="Within-fold ensemble r">—</td></tr><tr><th scope="row">T6a</th><td class="wide" data-label="Method">Transformer (PULSE)</td><td data-label="Year">2026</td><td class="wide" data-label="Modality">EMG only</td><td class="num" data-label="Single-seed CV r">0.152 ± 0.128</td><td class="num" data-label="Within-fold ensemble r">—</td></tr><tr><th scope="row">T6b</th><td class="wide" data-label="Method">Pham BiLSTM</td><td data-label="Year">2018</td><td class="wide" data-label="Modality">hand MoCap</td><td class="num" data-label="Single-seed CV r">0.271 ± 0.048</td><td class="num" data-label="Within-fold ensemble r">0.264 ± 0.056</td></tr><tr><th scope="row">T6b</th><td class="wide" data-label="Method">LateFusion (CNN+BiLSTM)</td><td data-label="Year">2026</td><td class="wide" data-label="Modality">EMG+MoCap</td><td class="num" data-label="Single-seed CV r">0.270 ± 0.064</td><td class="num" data-label="Within-fold ensemble r">0.291 ± 0.090</td></tr><tr><th scope="row">T6b</th><td class="wide" data-label="Method">Pham BiLSTM</td><td data-label="Year">2018</td><td class="wide" data-label="Modality">EMG+MoCap (concat)</td><td class="num" data-label="Single-seed CV r">0.304 ± 0.078</td><td class="num" data-label="Within-fold ensemble r">0.321 ± 0.110</td></tr><tr class="is-best"><th scope="row">T6b</th><td class="wide" data-label="Method">Ghorbani GRU</td><td data-label="Year">2023</td><td class="wide" data-label="Modality">hand MoCap</td><td class="num" data-label="Single-seed CV r">0.298 ± 0.045</td><td class="num" data-label="Within-fold ensemble r">0.372 ± 0.072</td></tr></tbody></table></div><p class="tab-note">For scalar grip force (T6a), sEMG is the strongest input because muscle-activation envelopes encode force magnitude. For the spatial map (T6b), hand MoCap with a GRU is strongest. A non-trivial gap remains relative to fixed-test-set numbers reported on related benchmarks for isometric single-grasp force regression, so T6 stays an open challenge for cross-subject force estimation.</p></div><div class="tab-panel" role="tabpanel" id="panel-T7" aria-labelledby="tab-T7" tabindex="0"><h4 class="panel-title"><span class="tcode">T7</span> EMG to hand pose</h4><div class="table-wrap"><table class="tbl tbl-res tbl-stack"><caption>T7 EMG-to-hand-pose reconstruction: 21 dominant-hand joints from EMG only. MPJPE and fingertip MPJPE in mm, bone angle error in degrees; lower is better. Volunteer-stratified 5-fold CV; for the pool size see the note under Tasks.</caption><thead><tr><th scope="col">Method</th><th scope="col" class="num">MPJPE ↓</th><th scope="col" class="num">Fingertip MPJPE ↓</th><th scope="col" class="num">Angle Error ↓</th></tr></thead><tbody><tr class="is-best"><th scope="row">EMG2Pose</th><td class="num" data-label="MPJPE ↓">11.845 ± 0.468</td><td class="num" data-label="Fingertip MPJPE ↓">24.527 ± 1.226</td><td class="num" data-label="Angle Error ↓">13.997 ± 1.135</td></tr><tr><th scope="row">NeuroPose</th><td class="num" data-label="MPJPE ↓">11.972 ± 0.731</td><td class="num" data-label="Fingertip MPJPE ↓">24.827 ± 1.805</td><td class="num" data-label="Angle Error ↓">13.660 ± 1.333</td></tr><tr><th scope="row">Transformer</th><td class="num" data-label="MPJPE ↓">12.099 ± 0.706</td><td class="num" data-label="Fingertip MPJPE ↓">25.198 ± 1.733</td><td class="num" data-label="Angle Error ↓">13.804 ± 1.272</td></tr></tbody></table></div><p class="tab-note">All three models recover hand pose from EMG alone with MPJPE around 12 mm; the best and worst differ by only 0.254 mm, so T7 does not single out an architecture.</p></div>
+    </div>
+
+    <div class="case">
+      <header>
+        <p class="eyebrow">F0 · Case study</p>
+        <h3>Muscle activity and hand motion lead contact by about half a second</h3>
+      </header>
+      <p>Grasp onset is defined as the moment total hand pressure crosses 5 g from below. Of 3,723 grasp events detected across 80 recordings, 413 clean events that start from a quiescent pre-grasp period are retained. Aligned to contact and averaged over these events, the EMG envelope and hand velocity rise well before the pressure jump (first figure). Per-event onset estimates average −568 ± 370 ms for EMG (median −530 ms) and −586 ± 355 ms for hand motion (median −580 ms) relative to contact (second figure).</p>
+      <div class="case-figs">
+        <figure class="figure figure-mid">
+          <a class="plate zoom" href="assets/img/grasp_phase_timing.png" target="_blank" rel="noopener" title="Open the full-size image"><img src="assets/img/grasp_phase_timing.png" width="1400" height="770" alt="Line chart from minus 2000 to plus 500 ms around pressure contact onset, averaged over 413 grasp events. The EMG envelope and hand velocity climb from a low baseline starting at roughly minus 1300 ms; hand velocity peaks near minus 600 ms and the EMG envelope stays high until contact. Dotted lines mark the mean onset estimates, minus 568 ms for EMG and minus 586 ms for motion. The pressure trace falls to zero just before 0 ms and jumps at contact." loading="lazy"></a>
+          <figcaption>EMG envelope, hand velocity and pressure averaged across 413 clean grasp events and aligned to pressure contact onset (t = 0); shaded bands are ±0.5σ. Dotted lines mark the mean per-event onset estimates. <a class="full" href="assets/img/grasp_phase_timing.png" target="_blank" rel="noopener">Full size</a></figcaption>
+        </figure>
+        <figure class="figure">
+          <a class="plate zoom" href="assets/img/delay_distributions.png" target="_blank" rel="noopener" title="Open the full-size image"><img src="assets/img/delay_distributions.png" width="1400" height="498" alt="Two histograms of per-event onset delays relative to contact: EMG onset with mean minus 568 ms and median minus 530 ms; hand motion onset with mean minus 586 ms and median minus 580 ms." loading="lazy"></a>
+          <figcaption>Per-event onset delays relative to contact: EMG −568 ± 370 ms, hand motion −586 ± 355 ms. <a class="full" href="assets/img/delay_distributions.png" target="_blank" rel="noopener">Full size</a></figcaption>
+        </figure>
+      </div>
+    </div>
+
+    <h3 class="h-sub">Reference models</h3>
+    <div class="methods">
+      <article class="method">
+        <h4>SyncFuse <span class="tag">T1</span></h4>
+        <p>A late-fusion model built for PULSE. Each of the five modalities passes through its own two-layer MLP → BiGRU stem with LayerNorm; per-frame features are concatenated across modalities, passed through a two-layer BiLSTM and attention-pooled over time. Per-sample modality dropout (p = 0.3) during training enforces graceful degradation. 1.6M parameters.</p>
+        <p class="method-num">Macro F1 <b>0.626 ± 0.099</b> on T1, +5.6 pp over the strongest published baseline (CTR-GCN).</p>
+      </article>
+      <article class="method">
+        <h4>DailyActFormer <span class="tag">T2</span></h4>
+        <p>A multi-modal action classifier built on HandFormer's multi-scale convolutional backbone, with per-modality multi-scale 1-D conv stems, modality dropout (p = 0.3), concat → 1×1-conv fusion and attention pooling over time, feeding a joint verb–noun head.</p>
+        <p class="method-num">act_vn@5 <b>0.403 ± 0.029</b> on T2. Margins over the strongest published baselines are small and confidence intervals overlap, so it is released as a strong baseline rather than a decisive model contribution.</p>
+      </article>
+      <article class="method">
+        <h4>Baseline suite</h4>
+        <p>Three backbones (CNN1D, BiLSTM, Transformer) and nine fusion strategies (early, late, weighted late, gated late, attention, stacking, product of experts, mixture of experts, feature concatenation).</p>
+        <p>Published methods. T1: ST-GCN, CTR-GCN, LIMU-BERT, an sEMG CNN, ActionSense LSTM, MulT and Perceiver IO, reproduced with their original architectures. T2: DeepConvLSTM, RU-LSTM, FUTR, AFFT and HandFormer, with architectures and hyperparameters adapted from each paper's recommendation, plus a from-scratch ActionLLM surrogate. T6–T7: Pham BiLSTM, Ghorbani GRU, EMG2Pose and NeuroPose.</p>
+      </article>
+    </div>
+    <p class="sec-note sec-note-after">Across tasks no single modality dominates: EMG is the strongest single input for grasp anticipation (T3), hand MoCap for spatial pressure regression (T6b), and MoCap and IMU carry most of the scene signal (T4). Fusion remains non-trivial at this data scale, and every task leaves substantial headroom.</p>
+  </div>
+</section>
+
+<!-- ============================== COMPARISON ============================== -->
+<section id="comparison" class="section">
+  <div class="wrap">
+    <header class="sec-head">
+      <h2>Comparison with existing datasets</h2>
+      <p class="sec-intro">PULSE combines all five non-visual sensing modalities with hardware synchronization in daily-activity contexts. Table reproduced from the paper.</p>
+    </header>
+    <div class="table-wrap">
+      <table class="tbl tbl-cmp">
+        <caption class="sr-only">Comparison of PULSE with representative human-activity datasets</caption>
+        <thead><tr><th scope="col">Dataset</th><th scope="col" class="num">Year</th><th scope="col" class="num">Subjects</th><th scope="col" class="num">Hours</th><th scope="col">Setting</th><th scope="col" class="c"><abbr title="RGB video">V</abbr></th><th scope="col" class="c"><abbr title="full-body skeleton">S</abbr></th><th scope="col" class="c"><abbr title="finger-level hand tracking">H</abbr></th><th scope="col" class="c"><abbr title="surface EMG">E</abbr></th><th scope="col" class="c"><abbr title="gaze/eye tracking">G</abbr></th><th scope="col" class="c"><abbr title="inertial sensors">I</abbr></th><th scope="col" class="c"><abbr title="finger-level pressure">P</abbr></th><th scope="col" class="c"><abbr title="hardware-level time synchronization">Sync</abbr></th><th scope="col" class="num">Hz</th></tr></thead>
+        <tbody><tr class="grp"><th colspan="14" scope="colgroup">Video / Skeleton datasets</th></tr><tr><th scope="row">NTU RGB+D 120</th><td class="num meta" data-label="Year">2019</td><td class="num meta" data-label="Subjects">106</td><td class="num meta" data-label="Hours"><span class="na" title="not given in the paper's table">—</span></td><td class="meta" data-label="Setting">Lab</td><td class="c" data-label="V"><span class="y" aria-label="full support">✓</span></td><td class="c" data-label="S"><span class="y" aria-label="full support">✓</span></td><td class="c" data-label="H"><span class="l" aria-label="limited or partial support">◐</span></td><td class="c" data-label="E"><span class="n" aria-label="not provided">✗</span></td><td class="c" data-label="G"><span class="n" aria-label="not provided">✗</span></td><td class="c" data-label="I"><span class="n" aria-label="not provided">✗</span></td><td class="c" data-label="P"><span class="n" aria-label="not provided">✗</span></td><td class="c" data-label="Sync"><span class="y" aria-label="full support">✓</span></td><td class="num meta" data-label="Hz">30</td></tr><tr><th scope="row">Assembly101</th><td class="num meta" data-label="Year">2022</td><td class="num meta" data-label="Subjects">53</td><td class="num meta" data-label="Hours">513</td><td class="meta" data-label="Setting">Lab</td><td class="c" data-label="V"><span class="y" aria-label="full support">✓</span></td><td class="c" data-label="S"><span class="n" aria-label="not provided">✗</span></td><td class="c" data-label="H"><span class="l" aria-label="limited or partial support">◐</span></td><td class="c" data-label="E"><span class="n" aria-label="not provided">✗</span></td><td class="c" data-label="G"><span class="n" aria-label="not provided">✗</span></td><td class="c" data-label="I"><span class="n" aria-label="not provided">✗</span></td><td class="c" data-label="P"><span class="n" aria-label="not provided">✗</span></td><td class="c" data-label="Sync"><span class="y" aria-label="full support">✓</span></td><td class="num meta" data-label="Hz">60</td></tr><tr><th scope="row">EgoExo4D</th><td class="num meta" data-label="Year">2024</td><td class="num meta" data-label="Subjects">740</td><td class="num meta" data-label="Hours">1286</td><td class="meta" data-label="Setting">Real</td><td class="c" data-label="V"><span class="y" aria-label="full support">✓</span></td><td class="c" data-label="S"><span class="n" aria-label="not provided">✗</span></td><td class="c" data-label="H"><span class="l" aria-label="limited or partial support">◐</span></td><td class="c" data-label="E"><span class="n" aria-label="not provided">✗</span></td><td class="c" data-label="G"><span class="y" aria-label="full support">✓</span></td><td class="c" data-label="I"><span class="y" aria-label="full support">✓</span></td><td class="c" data-label="P"><span class="n" aria-label="not provided">✗</span></td><td class="c" data-label="Sync"><span class="y" aria-label="full support">✓</span></td><td class="num meta" data-label="Hz">30</td></tr><tr class="grp"><th colspan="14" scope="colgroup">Hand/Object interaction (motion capture)</th></tr><tr><th scope="row">GRAB</th><td class="num meta" data-label="Year">2020</td><td class="num meta" data-label="Subjects">10</td><td class="num meta" data-label="Hours">3.8</td><td class="meta" data-label="Setting">Lab</td><td class="c" data-label="V"><span class="n" aria-label="not provided">✗</span></td><td class="c" data-label="S"><span class="y" aria-label="full support">✓</span></td><td class="c" data-label="H"><span class="y" aria-label="full support">✓</span></td><td class="c" data-label="E"><span class="n" aria-label="not provided">✗</span></td><td class="c" data-label="G"><span class="n" aria-label="not provided">✗</span></td><td class="c" data-label="I"><span class="n" aria-label="not provided">✗</span></td><td class="c" data-label="P"><span class="n" aria-label="not provided">✗</span></td><td class="c" data-label="Sync"><span class="y" aria-label="full support">✓</span></td><td class="num meta" data-label="Hz">120</td></tr><tr><th scope="row">ContactPose</th><td class="num meta" data-label="Year">2020</td><td class="num meta" data-label="Subjects">50</td><td class="num meta" data-label="Hours"><span class="na" title="not given in the paper's table">—</span></td><td class="meta" data-label="Setting">Lab</td><td class="c" data-label="V"><span class="y" aria-label="full support">✓</span></td><td class="c" data-label="S"><span class="n" aria-label="not provided">✗</span></td><td class="c" data-label="H"><span class="y" aria-label="full support">✓</span></td><td class="c" data-label="E"><span class="n" aria-label="not provided">✗</span></td><td class="c" data-label="G"><span class="n" aria-label="not provided">✗</span></td><td class="c" data-label="I"><span class="n" aria-label="not provided">✗</span></td><td class="c" data-label="P"><span class="l" aria-label="limited or partial support">◐</span></td><td class="c" data-label="Sync"><span class="n" aria-label="not provided">✗</span></td><td class="num meta" data-label="Hz">30</td></tr><tr><th scope="row">H2O</th><td class="num meta" data-label="Year">2021</td><td class="num meta" data-label="Subjects">4</td><td class="num meta" data-label="Hours"><span class="na" title="not given in the paper's table">—</span></td><td class="meta" data-label="Setting">Lab</td><td class="c" data-label="V"><span class="y" aria-label="full support">✓</span></td><td class="c" data-label="S"><span class="n" aria-label="not provided">✗</span></td><td class="c" data-label="H"><span class="y" aria-label="full support">✓</span></td><td class="c" data-label="E"><span class="n" aria-label="not provided">✗</span></td><td class="c" data-label="G"><span class="n" aria-label="not provided">✗</span></td><td class="c" data-label="I"><span class="n" aria-label="not provided">✗</span></td><td class="c" data-label="P"><span class="n" aria-label="not provided">✗</span></td><td class="c" data-label="Sync"><span class="y" aria-label="full support">✓</span></td><td class="num meta" data-label="Hz">30</td></tr><tr><th scope="row">ARCTIC</th><td class="num meta" data-label="Year">2023</td><td class="num meta" data-label="Subjects">10</td><td class="num meta" data-label="Hours">1.4</td><td class="meta" data-label="Setting">Lab</td><td class="c" data-label="V"><span class="y" aria-label="full support">✓</span></td><td class="c" data-label="S"><span class="y" aria-label="full support">✓</span></td><td class="c" data-label="H"><span class="y" aria-label="full support">✓</span></td><td class="c" data-label="E"><span class="n" aria-label="not provided">✗</span></td><td class="c" data-label="G"><span class="n" aria-label="not provided">✗</span></td><td class="c" data-label="I"><span class="n" aria-label="not provided">✗</span></td><td class="c" data-label="P"><span class="n" aria-label="not provided">✗</span></td><td class="c" data-label="Sync"><span class="y" aria-label="full support">✓</span></td><td class="num meta" data-label="Hz">30</td></tr><tr class="grp"><th colspan="14" scope="colgroup">Wearable sensor datasets</th></tr><tr><th scope="row">Opportunity</th><td class="num meta" data-label="Year">2010</td><td class="num meta" data-label="Subjects">4</td><td class="num meta" data-label="Hours">25</td><td class="meta" data-label="Setting">Lab</td><td class="c" data-label="V"><span class="n" aria-label="not provided">✗</span></td><td class="c" data-label="S"><span class="n" aria-label="not provided">✗</span></td><td class="c" data-label="H"><span class="n" aria-label="not provided">✗</span></td><td class="c" data-label="E"><span class="n" aria-label="not provided">✗</span></td><td class="c" data-label="G"><span class="n" aria-label="not provided">✗</span></td><td class="c" data-label="I"><span class="y" aria-label="full support">✓</span></td><td class="c" data-label="P"><span class="n" aria-label="not provided">✗</span></td><td class="c" data-label="Sync"><span class="l" aria-label="limited or partial support">◐</span></td><td class="num meta" data-label="Hz">30</td></tr><tr><th scope="row">PAMAP2</th><td class="num meta" data-label="Year">2012</td><td class="num meta" data-label="Subjects">9</td><td class="num meta" data-label="Hours">10</td><td class="meta" data-label="Setting">Lab</td><td class="c" data-label="V"><span class="n" aria-label="not provided">✗</span></td><td class="c" data-label="S"><span class="n" aria-label="not provided">✗</span></td><td class="c" data-label="H"><span class="n" aria-label="not provided">✗</span></td><td class="c" data-label="E"><span class="n" aria-label="not provided">✗</span></td><td class="c" data-label="G"><span class="n" aria-label="not provided">✗</span></td><td class="c" data-label="I"><span class="y" aria-label="full support">✓</span></td><td class="c" data-label="P"><span class="n" aria-label="not provided">✗</span></td><td class="c" data-label="Sync"><span class="y" aria-label="full support">✓</span></td><td class="num meta" data-label="Hz">100</td></tr><tr><th scope="row">USC-HAD</th><td class="num meta" data-label="Year">2012</td><td class="num meta" data-label="Subjects">14</td><td class="num meta" data-label="Hours">7</td><td class="meta" data-label="Setting">Real</td><td class="c" data-label="V"><span class="n" aria-label="not provided">✗</span></td><td class="c" data-label="S"><span class="n" aria-label="not provided">✗</span></td><td class="c" data-label="H"><span class="n" aria-label="not provided">✗</span></td><td class="c" data-label="E"><span class="n" aria-label="not provided">✗</span></td><td class="c" data-label="G"><span class="n" aria-label="not provided">✗</span></td><td class="c" data-label="I"><span class="y" aria-label="full support">✓</span></td><td class="c" data-label="P"><span class="n" aria-label="not provided">✗</span></td><td class="c" data-label="Sync"><span class="na" aria-label="not applicable">n/a</span></td><td class="num meta" data-label="Hz">100</td></tr><tr class="grp"><th colspan="14" scope="colgroup">Multimodal sensor (recent)</th></tr><tr><th scope="row">ActionSense</th><td class="num meta" data-label="Year">2022</td><td class="num meta" data-label="Subjects">10</td><td class="num meta" data-label="Hours">9.1</td><td class="meta" data-label="Setting">Lab</td><td class="c" data-label="V"><span class="y" aria-label="full support">✓</span></td><td class="c" data-label="S"><span class="l" aria-label="limited or partial support">◐</span></td><td class="c" data-label="H"><span class="l" aria-label="limited or partial support">◐</span></td><td class="c" data-label="E"><span class="y" aria-label="full support">✓</span></td><td class="c" data-label="G"><span class="y" aria-label="full support">✓</span></td><td class="c" data-label="I"><span class="y" aria-label="full support">✓</span></td><td class="c" data-label="P"><span class="l" aria-label="limited or partial support">◐</span></td><td class="c" data-label="Sync"><span class="y" aria-label="full support">✓</span></td><td class="num meta" data-label="Hz">mixed</td></tr><tr><th scope="row">MM-Fi</th><td class="num meta" data-label="Year">2023</td><td class="num meta" data-label="Subjects">40</td><td class="num meta" data-label="Hours">3.0</td><td class="meta" data-label="Setting">Lab</td><td class="c" data-label="V"><span class="y" aria-label="full support">✓</span></td><td class="c" data-label="S"><span class="y" aria-label="full support">✓</span></td><td class="c" data-label="H"><span class="n" aria-label="not provided">✗</span></td><td class="c" data-label="E"><span class="n" aria-label="not provided">✗</span></td><td class="c" data-label="G"><span class="n" aria-label="not provided">✗</span></td><td class="c" data-label="I"><span class="n" aria-label="not provided">✗</span></td><td class="c" data-label="P"><span class="n" aria-label="not provided">✗</span></td><td class="c" data-label="Sync"><span class="y" aria-label="full support">✓</span></td><td class="num meta" data-label="Hz">30</td></tr><tr><th scope="row">HA-ViD</th><td class="num meta" data-label="Year">2023</td><td class="num meta" data-label="Subjects">30</td><td class="num meta" data-label="Hours">86.9</td><td class="meta" data-label="Setting">Lab</td><td class="c" data-label="V"><span class="y" aria-label="full support">✓</span></td><td class="c" data-label="S"><span class="n" aria-label="not provided">✗</span></td><td class="c" data-label="H"><span class="n" aria-label="not provided">✗</span></td><td class="c" data-label="E"><span class="n" aria-label="not provided">✗</span></td><td class="c" data-label="G"><span class="n" aria-label="not provided">✗</span></td><td class="c" data-label="I"><span class="n" aria-label="not provided">✗</span></td><td class="c" data-label="P"><span class="n" aria-label="not provided">✗</span></td><td class="c" data-label="Sync"><span class="y" aria-label="full support">✓</span></td><td class="num meta" data-label="Hz">30</td></tr><tr><th scope="row">OctoNet</th><td class="num meta" data-label="Year">2025</td><td class="num meta" data-label="Subjects">41</td><td class="num meta" data-label="Hours">41</td><td class="meta" data-label="Setting">Lab</td><td class="c" data-label="V"><span class="y" aria-label="full support">✓</span></td><td class="c" data-label="S"><span class="y" aria-label="full support">✓</span></td><td class="c" data-label="H"><span class="l" aria-label="limited or partial support">◐</span></td><td class="c" data-label="E"><span class="n" aria-label="not provided">✗</span></td><td class="c" data-label="G"><span class="n" aria-label="not provided">✗</span></td><td class="c" data-label="I"><span class="y" aria-label="full support">✓</span></td><td class="c" data-label="P"><span class="n" aria-label="not provided">✗</span></td><td class="c" data-label="Sync"><span class="y" aria-label="full support">✓</span></td><td class="num meta" data-label="Hz">mixed</td></tr><tr class="ours"><th scope="row">PULSE</th><td class="num meta" data-label="Year">2026</td><td class="num meta" data-label="Subjects">40</td><td class="num meta" data-label="Hours">9.6</td><td class="meta" data-label="Setting">Lab</td><td class="c" data-label="V"><span class="y" aria-label="full support">✓</span></td><td class="c" data-label="S"><span class="y" aria-label="full support">✓</span></td><td class="c" data-label="H"><span class="y" aria-label="full support">✓</span></td><td class="c" data-label="E"><span class="y" aria-label="full support">✓</span></td><td class="c" data-label="G"><span class="y" aria-label="full support">✓</span></td><td class="c" data-label="I"><span class="y" aria-label="full support">✓</span></td><td class="c" data-label="P"><span class="y" aria-label="full support">✓</span></td><td class="c" data-label="Sync"><span class="y" aria-label="full support">✓</span></td><td class="num meta" data-label="Hz">100<a class="fn" href="#fn-cmp" aria-label="note on PULSE in this table">*</a></td></tr></tbody>
+      </table>
+    </div>
+    <p class="fineprint"><span class="sym y">✓</span> full support · <span class="sym l">◐</span> limited or partial · <span class="sym n">✗</span> not provided · n/a: single-device dataset where synchronization does not apply · —: not given in the paper's table. V RGB video · S full-body skeleton · H finger-level hand tracking · E surface EMG · G gaze / eye tracking · I inertial sensors · P finger-level pressure · Sync hardware-level time synchronization. ContactPose uses post-hoc thermal contact maps; PAMAP2 provides IMU and heart-rate streams but no EMG. PULSE hours include ≈6.8 h of daily-activity scenarios and ≈2.8 h of motion-primitive recordings.</p>
+    <p class="fineprint" id="fn-cmp"><b>*</b> PULSE row as in the paper. Its Hz value is the rate of the shared aligned grid; the devices record at their own native rates and are resampled onto it. Its S mark follows the paper; the released skeleton and markers cover the head, trunk, arms and hands, without legs.</p>
+  </div>
+</section>
+
+<!-- ============================== DATA ============================== -->
+<section id="data" class="section">
+  <div class="wrap">
+    <header class="sec-head">
+      <h2>Data format and download</h2>
+      <p class="sec-intro">Each recording is a folder of per-modality CSV files on one shared 100 Hz grid, with time in seconds from the start of the recording. Annotations ship as one JSON file per recording and as a flat table.</p>
+    </header>
+    <div class="dl-grid">
+      <a class="dl" href="https://huggingface.co/datasets/velvet-pine-22/PULSE" target="_blank" rel="noopener">
+        <span class="dl-k">Dataset</span>
+        <span class="dl-v">huggingface.co/datasets/velvet-pine-22/PULSE</span>
+        <span class="dl-d">Aligned sensor CSVs, raw MoCap skeleton exports, annotations and metadata.</span>
+      </a>
+      <a class="dl" href="https://huggingface.co/velvet-pine-22/PULSE-code" target="_blank" rel="noopener">
+        <span class="dl-k">Code</span>
+        <span class="dl-v">huggingface.co/velvet-pine-22/PULSE-code</span>
+        <span class="dl-d">PyTorch dataset wrappers, baselines including SyncFuse and DailyActFormer, training and evaluation scripts.</span>
+      </a>
+      <div class="dl dl-soon" aria-disabled="true">
+        <span class="dl-k">Sample</span>
+        <span class="dl-v">link pending a privacy check</span>
+        <span class="dl-d">One complete recording (v1s1), the source of the viewer above. The sample repository also holds two eye-tracker video files (scene camera and eye video) that are being checked for identifiable content; the link will be added afterwards. The same v1s1 sensor and annotation files are in the full dataset.</span>
+      </div>
+      <a class="dl" href="https://doi.org/10.57967/hf/11314" target="_blank" rel="noopener">
+        <span class="dl-k">DOI</span>
+        <span class="dl-v">10.57967/hf/11314</span>
+        <span class="dl-d">Persistent identifier for this dataset release, registered with DataCite through Hugging Face. Cite it when you use the data.</span>
+      </a>
+      <div class="dl dl-soon" aria-disabled="true">
+        <span class="dl-k">Paper</span>
+        <span class="dl-v">camera-ready PDF coming soon</span>
+        <span class="dl-d">The NeurIPS 2026 camera-ready PDF will be linked here once the proceedings page is live.</span>
+      </div>
+    </div>
+    <div class="data-grid">
+      <div>
+        <h3 class="h-small">Repository layout</h3>
+        <pre class="code code-tree"><code>PULSE/
+├── README.md              dataset card
+├── DATASHEET.md           datasheet
+├── LICENSE                CC BY-NC 4.0 + use restrictions
+├── CODE_LICENSE           MIT
+├── croissant.json         Croissant 1.0 + RAI fields
+├── data/
+│   └── v{id}/s{1–9}/      one folder per recording
+│       ├── aligned_mocap_100hz.csv
+│       ├── aligned_emg_100hz.csv
+│       ├── aligned_eyetrack_100hz.csv
+│       ├── aligned_imu_100hz.csv
+│       ├── aligned_pressure_100hz.csv
+│       ├── aligned_myo_pose_100hz.csv   auxiliary
+│       ├── aligned_myo_quat_100hz.csv   auxiliary
+│       ├── alignment_metadata.json
+│       └── raw/
+│           └── aligned_v{id}s{n}_s_Q.tsv   MoCap skeleton
+├── annotations/
+│   └── v{id}/s{1–8}.json  action segments
+├── annotations_flat/
+│   └── segments.csv       one row per segment
+└── metadata/
+    └── recordings.csv     one row per recording</code></pre>
+        <p class="fineprint">Volunteer folders v1–v41 (v7 unassigned). A file is absent when that stream was not captured for the recording; <code>raw/</code> exists only for recordings with MoCap.</p>
+      </div>
+      <div>
+        <h3 class="h-small">Quick start</h3>
+        <pre class="code"><code>from datasets import load_dataset
+
+# One modality across all recordings
+# (configs: emg, imu, mocap, pressure)
+emg = load_dataset(&quot;velvet-pine-22/PULSE&quot;, &quot;emg&quot;,
+                   split=&quot;train&quot;)
+
+# Flat action-segment table, one row per segment
+seg = load_dataset(&quot;velvet-pine-22/PULSE&quot;,
+                   &quot;action_segments&quot;, split=&quot;train&quot;)</code></pre>
+        <pre class="code"><code># Whole repository, without the raw skeleton exports
+hf download velvet-pine-22/PULSE --repo-type dataset \
+    --exclude &#x27;data/v*/s*/raw/**&#x27;</code></pre>
+        <p class="fineprint"><code>load_dataset</code> concatenates all recordings of a modality into one table without file paths, and the per-modality CSVs carry no ID columns. To keep volunteer and scenario IDs, download the recording folders and read each file on its own; the IDs are in the path <code>data/v{id}/s{n}/</code>. Eye tracking has no working <code>load_dataset</code> configuration, because two recordings (v1s1, v14s8) have 16 instead of 26 columns; read <code>aligned_eyetrack_100hz.csv</code> file by file.</p>
+      </div>
+    </div>
+    <details class="fold">
+      <summary><span class="h-sub-inline">Files per recording</span> <span class="muted">11 file types and their columns</span></summary>
+    <div class="table-wrap">
+      <table class="tbl tbl-fmt tbl-stack">
+        <caption class="sr-only">Files per recording and their columns</caption>
+        <thead><tr><th scope="col">File</th><th scope="col">Stream</th><th scope="col" class="num">Columns</th><th scope="col">Contents</th></tr></thead>
+        <tbody><tr><th scope="row"><code>aligned_mocap_100hz.csv</code></th><td data-label="Stream">MoCap</td><td class="num" data-label="Columns">211</td><td class="txt" data-label="Contents">time, Frame, Time, then 52 labeled Qualisys markers × (X, Y, Z, Type); Type marks measured versus gap-filled samples</td></tr><tr><th scope="row"><code>raw/aligned_v{id}s{n}_s_Q.tsv</code></th><td data-label="Stream">MoCap skeleton</td><td class="num" data-label="Columns">424</td><td class="txt" data-label="Contents">Frame, Time, 56 skeleton segments × (X, Y, Z, QX, QY, QZ, QW) and 10 fingertip points × (X, Y, Z): the 422-d representation; tab-separated</td></tr><tr><th scope="row"><code>aligned_emg_100hz.csv</code></th><td data-label="Stream">EMG</td><td class="num" data-label="Columns">9</td><td class="txt" data-label="Contents">time, emg_1 … emg_8</td></tr><tr><th scope="row"><code>aligned_eyetrack_100hz.csv</code></th><td data-label="Stream">Eye tracking</td><td class="num" data-label="Columns">26</td><td class="txt" data-label="Contents">time, UTC, then 24 Dikablis features: pupil position, pupil area / height / width, fixations, saccades, scene-camera gaze x / y. Recordings v1s1 and v14s8 have 16 columns: the 10 left-eye columns are absent</td></tr><tr><th scope="row"><code>aligned_imu_100hz.csv</code></th><td data-label="Stream">IMU</td><td class="num" data-label="Columns">181</td><td class="txt" data-label="Contents">time, then 10 units (WT0–WT9) × 18: acceleration, angular velocity, Euler angle, magnetic field, quaternion (16 signal channels), temperature, battery. Column headers are in Chinese (e.g. 加速度X = acceleration X)</td></tr><tr><th scope="row"><code>aligned_pressure_100hz.csv</code></th><td data-label="Stream">Pressure</td><td class="num" data-label="Columns">51</td><td class="txt" data-label="Contents">time, R1(g) … R25(g), L1(g) … L25(g)</td></tr><tr><th scope="row"><code>aligned_myo_pose_100hz.csv / _quat_</code></th><td data-label="Stream">Myo auxiliary</td><td class="num" data-label="Columns">2 / 5</td><td class="txt" data-label="Contents">Armband gesture label; armband orientation quaternion</td></tr><tr><th scope="row"><code>alignment_metadata.json</code></th><td data-label="Stream">Alignment</td><td class="num" data-label="Columns">–</td><td class="txt" data-label="Contents">Common start and end, duration, sample count, per-modality offsets, missing modalities and warnings</td></tr><tr><th scope="row"><code>annotations/v{id}/s{n}.json</code></th><td data-label="Stream">Segments</td><td class="num" data-label="Columns">–</td><td class="txt" data-label="Contents">{segments: [{timestamp, action_annotation: {action_name, hand_type, is_lhand, is_rhand, text_key, text_variants, object_name}}]}</td></tr><tr><th scope="row"><code>annotations_flat/segments.csv</code></th><td data-label="Stream">Segments</td><td class="num" data-label="Columns">15</td><td class="txt" data-label="Contents">volunteer, scenario, recording_id, segment_idx, timestamp, start_sec, end_sec, duration_sec, primitive, hand, is_left_hand, is_right_hand, object, description, description_variants</td></tr><tr><th scope="row"><code>metadata/recordings.csv</code></th><td data-label="Stream">Recordings</td><td class="num" data-label="Columns">9</td><td class="txt" data-label="Contents">recording_id, volunteer_id, scenario_id, duration_sec, n_samples_100hz, aligned_modalities, missing_modalities, has_dense_annotations, split</td></tr></tbody>
+      </table>
+    </div>
+    <p class="fineprint">The <code>split</code> column in <code>recordings.csv</code> holds a fixed held-out split (5 test volunteers). The paper's benchmarks use volunteer-stratified 5-fold cross-validation instead.</p>
+    </details>
+    <div class="license-grid">
+      <div class="license">
+        <h3 class="h-small">License</h3>
+        <p><b>Data:</b> <a href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank" rel="noopener">CC BY-NC 4.0</a> (non-commercial use with attribution). The release additionally asks users to agree to the following use terms (see <code>LICENSE</code> in the repository). By downloading or using PULSE you agree not to:</p>
+        <ol class="restrict"><li>Attempt to re-identify any participant beyond information already present in the released data.</li><li>Use the dataset to train, evaluate, or deploy systems whose primary purpose is covert worker surveillance, employee monitoring, or biometric identification of individuals without their freely given and revocable informed consent.</li><li>Redistribute the raw scene-camera video or audio streams in a manner that conflicts with the participant media-release agreement signed at collection time (i.e., outside of bona fide academic research).</li></ol>
+        <p class="fineprint">Downstream deployment of any model trained on PULSE for inference of sensitive attributes (e.g., fatigue, stress, medical conditions) on new human subjects requires its own ethics review by the deploying institution.</p>
+        <p><b>Code:</b> MIT License (data loaders, training pipelines, baseline implementations and evaluation scripts).</p>
+      </div>
+      <div class="license">
+        <h3 class="h-small">Metadata files</h3>
+        <p>The repository root also carries <code>croissant.json</code> (Croissant 1.0 with Responsible-AI fields), a datasheet (<code>DATASHEET.md</code>), <code>LICENSE</code> and <code>CODE_LICENSE</code>.</p>
+        <p class="note">The annotation-provenance statements in the dataset card, <code>DATASHEET.md</code> and <code>croissant.json</code> are being revised by the authors. The labels in the current release are the VLM-generated, human-checked segments described under <a href="#annotations">Annotations</a>.</p>
+        <p class="fineprint">The dataset release carries the persistent identifier <a href="https://doi.org/10.57967/hf/11314">10.57967/hf/11314</a>. An archival mirror is still planned.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== ETHICS & LIMITATIONS ============================== -->
+<section id="ethics" class="section">
+  <div class="wrap">
+    <header class="sec-head">
+      <h2>Ethics, privacy and limitations</h2>
+    </header>
+    <div class="two-col">
+      <div>
+        <h3 class="h-small">Participants and consent</h3>
+        <ul class="plain">
+          <li>40 healthy adult volunteers recruited on a university campus, aged 18–26 (mean 21.2); 31 male and 9 female; 26 right-handed and 14 left-handed.</li>
+          <li>Researchers explained the potential risks before each session, including risks from tools and props and a modest loss of hand dexterity from the sensor suite, and obtained written informed consent. Participants who paused or withdrew still received full compensation.</li>
+          <li>All participants signed a media-release agreement for the scene-camera and eye-tracking videos. The full protocol was reviewed and approved by the authors' institutional ethics committee.</li>
+          <li>Participant names, contact details and other directly identifying metadata are kept confidential and are not distributed. Volunteers appear only under pseudonymous IDs (v1–v41).</li>
+        </ul>
+        <h3 class="h-small">Use</h3>
+        <ul class="plain">
+          <li>EMG, eye tracking, pressure and first-person video are behavioural and biometric-class signals with privacy and misuse risks. The license forbids re-identification attempts, covert worker surveillance and biometric identification without freely given consent.</li>
+          <li>Models trained on PULSE should not be deployed on new populations without additional validation and ethics review.</li>
+        </ul>
+      </div>
+      <div>
+        <h3 class="h-small">Limitations</h3>
+        <ul class="plain"><li><b>Scale.</b> 40 volunteers, 304 task recordings and 33 motion-primitive recordings suffice for baseline construction but are modest for large-scale activity modeling.</li><li><b>Modality coverage.</b> MoCap and pressure are missing from part of the recordings, so hardware-heavy experiments use smaller and potentially less representative subject subsets. The IMU + EMG + eye-tracking core is the most deployment-friendly setting.</li><li><b>Optical MoCap.</b> It needs marker placement and lab calibration, and raw absolute joint coordinates are highly subject-dependent. Occlusion, lighting and electrode-placement shifts remain open problems for the wearable subset.</li><li><b>Fusion on small data.</b> Multi-modal fusion models overfit more than single-modality backbones; optimization rather than modality count is the main constraint at this scale.</li><li><b>Video is auxiliary.</b> Scene-camera video is excluded from the headline benchmark, which targets 100 Hz non-visual signals that 25 fps RGB video cannot capture.</li><li><b>Label resolution.</b> Segment boundaries have 1 s resolution and describe semantic intervals, not 100 Hz event times.</li><li><b>Open challenges.</b> Several tasks show negative or high-variance results, for example adding IMU to EMG hurts grasp anticipation and pressure prediction remains difficult. The tasks define open problems rather than solved ones.</li></ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== CITATION ============================== -->
+<section id="citation" class="section">
+  <div class="wrap">
+    <header class="sec-head">
+      <h2>Citation</h2>
+      <p class="sec-intro">Proceedings details (volume, pages) will be added when the NeurIPS 2026 proceedings are published.</p>
+    </header>
+    <div class="bib">
+      <button class="copy-btn" id="copyBib" type="button" data-target="bibtex">Copy BibTeX</button>
+      <pre class="code code-bib" id="bibtex"><code>@inproceedings{liang2026pulse,
+  title     = {{PULSE}: A Synchronized Five-Modality Dataset for Sensorimotor Coordination in Long-Horizon Daily Activities},
+  author    = {Liang, Wolin and Gao, Yang and Yan, Peiyu and Hu, YueXiang and Xiao, Yingjing and Ying, Xiongfeng and Guo, YingNian and Zhang, Cheng and Jin, Zhanpeng},
+  booktitle = {Advances in Neural Information Processing Systems (NeurIPS), Evaluations and Datasets Track},
+  year      = {2026}
+}</code></pre>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="footer">
+  <div class="wrap footer-inner">
+    <p><b>PULSE</b> · NeurIPS 2026 Evaluations &amp; Datasets Track</p>
+    <p>Data CC BY-NC 4.0 · Code MIT · DOI 10.57967/hf/11314 · Page v2.1, 2026-11-19</p>
+  </div>
+</footer>
+
+<div class="tooltip" id="tooltip" role="tooltip" hidden></div>
+<script src="assets/sample_preview.js"></script>
+<script src="assets/app.js"></script>
+</body>
+</html>
