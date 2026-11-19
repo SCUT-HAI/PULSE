@@ -58,7 +58,7 @@
           <a class="btn btn-primary" href="https://huggingface.co/datasets/velvet-pine-22/PULSE" target="_blank" rel="noopener">Dataset <span class="host">Hugging Face</span></a>
           <a class="btn" href="https://huggingface.co/velvet-pine-22/PULSE-code" target="_blank" rel="noopener">Code</a>
           <a class="btn" href="#citation">BibTeX</a>
-          <span class="btn btn-soon" aria-disabled="true" title="The paper PDF link will be added for the camera-ready version">Paper <span class="soon">coming soon</span></span>
+          <span class="btn btn-soon" aria-disabled="true" title="The paper PDF will be linked once the NeurIPS 2026 proceedings page is live">Paper <span class="soon">coming soon</span></span>
         </div>
       </div>
       <figure class="hero-fig">
@@ -71,17 +71,11 @@
       <figcaption>Sample recording v1s1 (S1, office desk organization), first 18 s. One trace per modality on the shared clock; bars underneath mark the annotated action segments.</figcaption>
     </figure>
     <dl class="keystrip">
-      <!-- source: sections/dataset.tex: 'We recruited 40 healthy adult volunteers from a university campus.' / '282 recordings from 36 volunteers have dense action-segment annotations' -->
       <div class="kpi"><dt>volunteers</dt><dd class="kpi-val">40</dd><dd class="kpi-sub">healthy adults; 36 with dense annotations</dd></div>
-      <!-- source: sections/dataset.tex: 'The dataset covers 8 daily-activity scenarios' / '33 volunteers completed a dedicated motion-primitive protocol (S9)' -->
       <div class="kpi"><dt>daily-activity scenarios</dt><dd class="kpi-val">8</dd><dd class="kpi-sub">plus a motion-primitive protocol (S9)</dd></div>
-      <!-- source: sections/dataset.tex: 'The public release contains 304 task recordings from the 8 daily-activity scenarios (S1–S8) ... plus 33 isolated motion-primitive recordings' -->
       <div class="kpi"><dt>task recordings</dt><dd class="kpi-val">304</dd><dd class="kpi-sub">plus 33 motion-primitive recordings</dd></div>
-      <!-- source: sections/related_work.tex (Table tab:dataset_comparison): 'PULSE duration includes ~6.8 h of daily-activity scenarios plus ~2.8 h of motion-primitive recordings.' -->
       <div class="kpi"><dt>hours recorded</dt><dd class="kpi-val">9.6 h</dd><dd class="kpi-sub">≈6.8 h of tasks + ≈2.8 h of primitives</dd></div>
-      <!-- source: camera-ready v12 dataset.tex: 'The 282 of the 304 task recordings (from 36 volunteers) carry dense action-segment annotations totalling 7,356 action segments.' (abstract: 'over 7,300'). -->
       <div class="kpi"><dt>action segments</dt><dd class="kpi-val">7,356</dd><dd class="kpi-sub">in 282 annotated recordings, each human-checked and corrected</dd></div>
-      <!-- source: sections/dataset.tex: 'All five sensor streams are synchronized to a unified 100 Hz time base.' -->
       <div class="kpi"><dt>shared time base</dt><dd class="kpi-val">100 Hz</dd><dd class="kpi-sub">every stream resampled onto one grid</dd></div>
     </dl>
   </div>
@@ -604,11 +598,11 @@
         <span class="dl-v">huggingface.co/velvet-pine-22/PULSE-code</span>
         <span class="dl-d">PyTorch dataset wrappers, baselines including SyncFuse and DailyActFormer, training and evaluation scripts.</span>
       </a>
-      <div class="dl dl-soon" aria-disabled="true">
+      <a class="dl" href="https://huggingface.co/datasets/velvet-pine-22/PULSE-sample" target="_blank" rel="noopener">
         <span class="dl-k">Sample</span>
-        <span class="dl-v">link pending a privacy check</span>
-        <span class="dl-d">One complete recording (v1s1), the source of the viewer above. The sample repository also holds two eye-tracker video files (scene camera and eye video) that are being checked for identifiable content; the link will be added afterwards. The same v1s1 sensor and annotation files are in the full dataset.</span>
-      </div>
+        <span class="dl-v">huggingface.co/datasets/velvet-pine-22/PULSE-sample</span>
+        <span class="dl-d">One complete recording (v1s1), the source of the viewer above: aligned sensor CSVs, the raw Qualisys skeleton, the annotation file, and both egocentric videos (scene camera and eye-tracking overlay). The same files are in the full dataset.</span>
+      </a>
       <a class="dl" href="https://doi.org/10.57967/hf/11314" target="_blank" rel="noopener">
         <span class="dl-k">DOI</span>
         <span class="dl-v">10.57967/hf/11314</span>
@@ -690,7 +684,7 @@ hf download velvet-pine-22/PULSE --repo-type dataset \
         <h3 class="h-small">Metadata files</h3>
         <p>The repository root also carries <code>croissant.json</code> (Croissant 1.0 with Responsible-AI fields), a datasheet (<code>DATASHEET.md</code>), <code>LICENSE</code> and <code>CODE_LICENSE</code>.</p>
         <p class="note">The annotation-provenance statements in the dataset card, <code>DATASHEET.md</code> and <code>croissant.json</code> are being revised by the authors. The labels in the current release are the VLM-generated, human-checked segments described under <a href="#annotations">Annotations</a>.</p>
-        <p class="fineprint">The dataset release carries the persistent identifier <a href="https://doi.org/10.57967/hf/11314">10.57967/hf/11314</a>. An archival mirror is still planned.</p>
+        <p class="fineprint">The dataset release carries the persistent identifier <a href="https://doi.org/10.57967/hf/11314">10.57967/hf/11314</a>, registered with DataCite through Hugging Face.</p>
       </div>
     </div>
   </div>
