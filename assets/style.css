@@ -305,6 +305,7 @@ a.zoom:hover { border-color: var(--rule-2); }
 a.full { white-space: nowrap; }
 a.full::after { content: " ↗"; }
 .figure-mid { max-width: 860px; }
+.rig-fig { max-width: 900px; margin: 18px auto 28px; }
 
 /* ------------------------------------------------------------------ overview */
 .overview-grid { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 40px; align-items: start; }
