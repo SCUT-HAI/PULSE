@@ -1062,7 +1062,7 @@
     if (window.PULSE_SAMPLE) { initViewer(); return; }
     loadState = 'loading';
     var s = document.createElement('script');
-    s.src = 'assets/sample.js?v=20261119c';
+    s.src = 'assets/sample.js?v=20261119d';
     s.async = true;
     s.onload = function () { loadState = 'done'; initViewer(); };
     s.onerror = function () { loadState = 'failed'; viewerFailed(); };
